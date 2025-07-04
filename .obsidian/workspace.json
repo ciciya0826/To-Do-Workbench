@@ -78,7 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 200
   },
   "right": {
     "id": "936ead46522bccf7",
@@ -167,6 +167,41 @@
   },
   "active": "ee3bb32cc32def7b",
   "lastOpenFiles": [
-    "README.md.md"
+    "app/node_modules/electron/node_modules/@types/node/trace_events.d.ts",
+    "app/node_modules/electron/node_modules/@types/node/tls.d.ts",
+    "app/node_modules/electron/node_modules/@types/node/test.d.ts",
+    "app/node_modules/electron/node_modules/@types/node/string_decoder.d.ts",
+    "app/node_modules/electron/node_modules/@types/node/stream.d.ts",
+    "app/node_modules/electron/node_modules/@types/node/sqlite.d.ts",
+    "app/node_modules/electron/node_modules/@types/node/sea.d.ts",
+    "app/node_modules/electron/node_modules/@types/node/repl.d.ts",
+    "app/node_modules/electron/node_modules/@types/node/process.d.ts",
+    "app/node_modules/electron/node_modules/@types/node/perf_hooks.d.ts",
+    "app/node_modules/electron/node_modules/@types/node/path.d.ts",
+    "app/node_modules/electron/node_modules/undici-types/README.md",
+    "app/node_modules/electron/README.md",
+    "app/node_modules/escape-string-regexp/readme.md",
+    "app/server/node_modules/is-promise/readme.md",
+    "app/server/node_modules/jstransformer/README.md",
+    "app/server/node_modules/css-parse/Readme.md",
+    "app/server/node_modules/css-parse/History.md",
+    "app/server/node_modules/morgan/README.md",
+    "app/server/node_modules/morgan/HISTORY.md",
+    "app/server/node_modules/raw-body/README.md",
+    "app/server/node_modules/raw-body/HISTORY.md",
+    "app/server/node_modules/vary/README.md",
+    "app/server/node_modules/vary/HISTORY.md",
+    "app/server/node_modules/media-typer/README.md",
+    "app/server/node_modules/media-typer/HISTORY.md",
+    "app/server/node_modules/type-is/README.md",
+    "app/server/node_modules/type-is/HISTORY.md",
+    "app/server/node_modules/mime-db/README.md",
+    "app/server/node_modules/mime-db/HISTORY.md",
+    "app/server/node_modules/mime-types/README.md",
+    "app/server/node_modules/mime-types/HISTORY.md",
+    "app/server/node_modules/forwarded/README.md",
+    "app/server/node_modules/forwarded/HISTORY.md",
+    "app/server/node_modules/proxy-addr/README.md",
+    "app/server/node_modules/proxy-addr/HISTORY.md"
   ]
 }

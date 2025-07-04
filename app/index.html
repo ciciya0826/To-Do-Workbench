@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <title>My app</title>
+    <style>
+      *{
+        padding: 0%;
+        margin: 0%;
+      }
+      .container{
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden; /*将溢出的内容隐藏*/
+      }
+      iframe{
+        width: 100%;
+        height: 100%;
+        border: 0;  /*去除边框*/
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <iframe src="http://localhost:3000/"></iframe>
+    </div>
+  </body>
+</html>
