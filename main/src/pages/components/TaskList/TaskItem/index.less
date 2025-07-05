@@ -1,0 +1,62 @@
+.task-item{
+    height: 100px;
+    padding: 6px 0px;
+    display: flex;
+    position: relative;
+    box-shadow: 0 0 1px 1px #b6b5b5;
+    align-items: flex-start;
+    border-radius: 2px;
+    cursor: pointer;
+    margin: 2px 5px 20px 5px;
+    transition: all 0.2s;
+    &:hover {
+        box-shadow: 0 0 2px 2px #b8b8b8;
+    }
+    &_info{
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        left:10px;
+    }
+    &_title{
+        font-size: 20px;
+        margin-bottom: 8px;
+    }
+    &_desc{
+        color:#4b4b4b
+    }
+    &_status{
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        right: 20px;
+    }
+    &_ddl{
+        display: flex;
+        font-size: 20px;
+        padding: 3px 12px;
+        margin-bottom: 8px;
+        width: auto;
+        height: auto;
+        font-size: 15px;
+        text-align: center;
+        justify-content: center;
+        background-color: rgb(200, 220, 250);
+        color: #9569fd;
+        font-weight: 550;
+        margin-top: 10px;
+        margin-bottom: 18px;
+        border-radius: 10%;
+    }
+    &_finish-btn{
+        display: flex;
+        text-align: center;
+        justify-content: center;
+        background-color: rgb(20, 102, 255);
+        border: 0;
+        height: 30px;
+        font-size: 17px;
+        color: white;
+        border-radius: 7%;
+    }
+}
