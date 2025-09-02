@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.27.6",
-    "ant-design-vue": "^4.2.6",
+    "antd": "^5.27.1",
     "umi": "^4.4.11"
   },
   "devDependencies": {

@@ -1,13 +1,49 @@
 .task-container{
-    background-color: rgb(240, 240, 240);
-    flex: 1;    //自适应剩余空间
-    padding: 4px 20px;
+    // background-color: rgb(245, 242, 242);
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    box-sizing: border-box; /* 确保内边距包含在宽度内 */
+    flex: 1;    //自适应剩余空间
+    padding: 4px 20px;
+    height: 100%;
 }
-.task-list{
-    overflow: auto;
-    
+    .task-list{
+        flex: 1;  // 占据剩余空间
+        padding-top: 15px;
+        box-sizing: border-box;
+        overflow: auto;
+    }
+    .add-task-btn{
+        box-shadow: 0 0 1px 1px #b6b5b5;
+        border-radius: 2px;
+        padding-top: 15px;
+        padding-bottom: 15px;
+        margin-bottom: 10px;
+        align-items: center; /* 水平方向居中所有子元素 */
+        box-shadow: 0 0 1px 1px #b6b5b5;
+        transition: all 0.2s;
+        &:hover {
+            box-shadow: 0 0 2px 2px #b8b8b8;
+        }
+        &_inner{
+            display: flex;
+            margin-left: 10px;
+            flex: 1;
+            align-items: center; /* 水平方向居中所有子元素 */
+            .text{
+                margin-left: 5px;
+                margin-right: 15px;
+                font-size: 15px;
+            }
+        }
+        .tags{
+            cursor: pointer;
+            padding:3px 5px 3px 5px;
+            font-size: 14px;
+            margin-top: 15px;
+            margin-left: 15px;
+        }
+    }
+
+.datepicker{
+    margin-bottom: 10px;
 }
