@@ -1,49 +1,116 @@
 import { PlusIcon } from '@/assets/icons/PlusIcon';
 import './index.less';
 import TaskItem from './TaskItem';
-import { DatePicker, Input, Tag } from 'antd';
-import { useState } from 'react';
+import { DatePicker, Input, Tag, Button, Drawer } from 'antd';
+import { useMemo, useState } from 'react';
+import moment, { Moment } from 'moment';
+import { quickTimeConfig } from './config';
 
 export default function TaskList() {
-  const onChange=(value:any, dateString:string | string[]) => {
-        console.log('Selected Time: ', value);
-        console.log('Formatted Selected Time: ', dateString);
-      }
-  const onOk = (value:any) => {
-  console.log('onOk: ', value);
-};
-  const [isCreate,setIsCreate] = useState(false);
-  const handleFocus=()=>{
-    setIsCreate(true);
+
+  type taskT = {
+    taskID:string
+    title: string
+    desc: string
+    //startTime: Moment
+    endTime: Moment
   }
+
+  const [isCreate, setIsCreate] = useState(false);
+  const [DDL, setDDL] = useState<Moment | null>(null);
+  const [curTitle, setCurTitle] = useState<string>('');
+  const [tasks, setTasks] = useState<taskT[]>([]);
+  const [open, setOpen] = useState(false);
+  const [activeTaskKey,setActiveTaskKey] = useState('');  //当前被激活的taskID
+
+  const activeTask = useMemo(()=>{
+    return tasks.find(i => i.taskID===activeTaskKey)
+  },[tasks,activeTaskKey]);
+
+  const onChange = (value: any, dateString: string | string[]) => {
+    console.log('Selected Time: ', value);
+    console.log('Formatted Selected Time: ', dateString);
+    setDDL(value);
+  }
+  const onOk = (value: any) => {
+    console.log('onOk: ', value);
+  };
+
+  const handleQuickCreate = (value: number) => {
+    let time = moment().add(value, 'd');
+    setDDL(time);
+  }
+
+  const handleCreate = () => {
+    const taskid=Date.now().toString();
+    setTasks([...tasks, {
+      taskID:taskid,
+      title: curTitle,
+      desc: '',
+      endTime: DDL as Moment
+    }])
+    setCurTitle('');
+    setIsCreate(false);
+    setDDL(null);
+  }
+
+  const OpenTask = (taskID:string) =>{
+    setOpen(true);
+    setActiveTaskKey(taskID)
+  }
+
+  const handleFinish = (key:string)=>{
+    setActiveTaskKey(key)
+    setTasks(tasks.filter(i=>i.taskID!==key))
+  }
+
   return (
     <div className='task-container'>
       <h1 className='title'>任务列表</h1>
       <div className='add-task-btn'>
         <div className='add-task-btn_inner'>
           <PlusIcon />
-          <Input className='text' placeholder='创建任务' onFocus={handleFocus} onBlur={()=>setIsCreate(false)}/>
+          <Input className='text' placeholder='创建任务' value={curTitle} onChange={(e) => setCurTitle(e.target.value)} onFocus={() => setIsCreate(true)} />
         </div>
         {isCreate && <div className='tags-container'>
-          <Tag className='tags' color="success">今天</Tag>
-          <Tag className='tags' color="processing">明天</Tag>
-          <Tag className='tags' color="cyan">其他时间</Tag>
-          </div>}
+          <div className='tags-btn'>
+            {quickTimeConfig.map(i => (
+              <Tag className='tags' color={i.color} onClick={() => handleQuickCreate(i.offset)}>{i.title}</Tag>
+            ))}
+          </div>
+          <DatePicker value={DDL} className='datepicker' showTime onChange={onChange} onOk={onOk} placeholder='选择任务截止日期' />
+          <div className='buttons'>
+            <Button className='cancel-btn' onClick={() => {
+              setCurTitle('');
+              setIsCreate(false);
+              setDDL(null);
+            }}>取消</Button>
+            <Button type="primary" className='confirm-btn' onClick={handleCreate} disabled={curTitle === '' || DDL === null} >确认添加</Button>
+          </div>
+        </div>}
       </div>
-      {/* <DatePicker  className='datepicker' showTime onChange={onChange} onOk={onOk} placeholder='选择任务截止日期'/> */}
       <div className='task-list'>
-        <TaskItem title='测试' desc='测试描述' endTime='7月5日' />
-        <TaskItem title='测试' desc='测试描述' endTime='7月5日' />
-        <TaskItem title='测试' desc='测试描述' endTime='7月5日' />
-        <TaskItem title='测试' desc='测试描述' endTime='7月5日' />
-        <TaskItem title='测试' desc='测试描述' endTime='7月5日' />
-        <TaskItem title='测试' desc='测试描述' endTime='7月5日' />
-        <TaskItem title='测试' desc='测试描述' endTime='7月5日' />
-        <TaskItem title='测试' desc='测试描述' endTime='7月5日' />
-        <TaskItem title='测试' desc='测试描述' endTime='7月5日' />
-        <TaskItem title='测试' desc='测试描述' endTime='7月5日' />
-        <TaskItem title='测试' desc='测试描述' endTime='7月5日' />
+        {tasks.map((task) => (
+          <TaskItem 
+          key={task.taskID} 
+          title={task.title} 
+          desc={task.desc} 
+          endTime={task.endTime.format('YYYY-MM-DD HH:mm:ss')} 
+          onClick={()=>OpenTask(task.taskID)}
+          active= {activeTaskKey===task.taskID}
+          onFinish={()=>handleFinish(task.taskID)}
+          />
+        ))}
       </div>
+      <Drawer title={activeTask?.title}
+        closable={{ 'aria-label': 'Close Button' }}
+        onClose={()=>setOpen(false)}
+        open={open}
+      >
+        <p>Some contents...</p>
+        <p>Some contents...</p>
+        <p>Some contents...</p>
+      </Drawer>
     </div>
   );
 }

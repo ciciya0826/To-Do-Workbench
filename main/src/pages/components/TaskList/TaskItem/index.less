@@ -17,6 +17,11 @@
         flex-direction: column;
         position: absolute;
         left:10px;
+        padding-left: 10px;
+        width: 900px;
+        &:hover{
+             background-color: rgb(240, 242, 244);
+         }
     }
     &_title{
         font-size: 20px;
@@ -38,6 +43,7 @@
         margin-bottom: 8px;
         width: auto;
         height: auto;
+        align-self: flex-start;
         font-size: 15px;
         text-align: center;
         justify-content: center;
@@ -46,7 +52,8 @@
         font-weight: 550;
         margin-top: 10px;
         margin-bottom: 18px;
-        border-radius: 10%;
+        border-radius: 2%;
+        margin-top: 15px;
     }
     &_finish-btn{
         display: flex;
@@ -55,8 +62,28 @@
         background-color: rgb(20, 102, 255);
         border: 0;
         height: 30px;
+        width: 200px;
         font-size: 17px;
         color: white;
-        border-radius: 7%;
+        border-radius: 2%;
+        margin-top: 15px;
+        cursor: pointer;
+        align-self: flex-start;
+    }
+    &_delete-btn{
+        display: flex;
+        text-align: center;
+        justify-content: center;
+        background-color: rgb(177, 217, 245);
+        border: 0;
+        height: 30px;
+        width: 200px;
+        font-size: 17px;
+        color: rgb(47, 96, 228);
+        border-radius: 2%;
+        margin-bottom: 15px;
+        margin-top: 10px;
+        cursor: pointer;
+        align-self: flex-start;
     }
 }
