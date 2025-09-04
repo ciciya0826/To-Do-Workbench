@@ -1,10 +1,11 @@
 import { PlusIcon } from '@/assets/icons/PlusIcon';
 import './index.less';
-import TaskItem from './TaskItem';
-import { DatePicker, Input, Tag, Button, Drawer } from 'antd';
+import TaskItem from './components/TaskItem';
+import { DatePicker, Input, Tag, Button, message} from 'antd';
 import { useMemo, useState } from 'react';
 import moment, { Moment } from 'moment';
 import { quickTimeConfig } from './config';
+import TaskDetail from './components/TaskDetail';
 
 export default function TaskList() {
 
@@ -16,7 +17,8 @@ export default function TaskList() {
     endTime: Moment
   }
 
-  const [isCreate, setIsCreate] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
+  const [isCreate, setIsCreate] = useState(false);  //是否继续展示DatePicker和tags
   const [DDL, setDDL] = useState<Moment | null>(null);
   const [curTitle, setCurTitle] = useState<string>('');
   const [tasks, setTasks] = useState<taskT[]>([]);
@@ -50,8 +52,13 @@ export default function TaskList() {
       endTime: DDL as Moment
     }])
     setCurTitle('');
-    setIsCreate(false);
+    setIsCreate(false); 
     setDDL(null);
+    messageApi.open({
+      type: 'success',
+      content: '创建成功',
+      duration: 0.9,
+    });
   }
 
   const OpenTask = (taskID:string) =>{
@@ -63,8 +70,24 @@ export default function TaskList() {
     setActiveTaskKey(key)
     setTasks(tasks.filter(i=>i.taskID!==key))
   }
+  const onConfirm=(taskID:string,title:string,desc:string,endTime:Moment|null)=>{
+    setOpen(false);
+    setTasks([...tasks.filter(i=>i.taskID!==taskID),{
+      taskID:Date.now().toString(),
+      title:title,
+      desc:desc,
+      endTime:endTime
+    }]);
+    messageApi.open({
+      type: 'success',
+      content: '修改成功',
+      duration: 0.9,
+    });
+  }
 
   return (
+    <>
+    {contextHolder}
     <div className='task-container'>
       <h1 className='title'>任务列表</h1>
       <div className='add-task-btn'>
@@ -75,7 +98,7 @@ export default function TaskList() {
         {isCreate && <div className='tags-container'>
           <div className='tags-btn'>
             {quickTimeConfig.map(i => (
-              <Tag className='tags' color={i.color} onClick={() => handleQuickCreate(i.offset)}>{i.title}</Tag>
+              <Tag key={i.offset} className='tags' color={i.color} onClick={() => handleQuickCreate(i.offset)}>{i.title}</Tag>
             ))}
           </div>
           <DatePicker value={DDL} className='datepicker' showTime onChange={onChange} onOk={onOk} placeholder='选择任务截止日期' />
@@ -102,15 +125,8 @@ export default function TaskList() {
           />
         ))}
       </div>
-      <Drawer title={activeTask?.title}
-        closable={{ 'aria-label': 'Close Button' }}
-        onClose={()=>setOpen(false)}
-        open={open}
-      >
-        <p>Some contents...</p>
-        <p>Some contents...</p>
-        <p>Some contents...</p>
-      </Drawer>
+      <TaskDetail task={activeTask} onClose={()=>setOpen(false)} open={open} key={activeTaskKey} onConfirm={onConfirm}/>
     </div>
+    </>
   );
 }
