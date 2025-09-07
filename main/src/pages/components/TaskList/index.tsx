@@ -2,7 +2,7 @@ import { PlusIcon } from '@/assets/icons/PlusIcon';
 import './index.less';
 import TaskItem from './components/TaskItem';
 import { DatePicker, Input, Tag, Button, message } from 'antd';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { quickTimeConfig } from './config';
 import TaskDetail from './components/TaskDetail';
 import dayjs, { Dayjs } from 'dayjs';
@@ -26,6 +26,22 @@ export default function TaskList() {
   const [tasks, setTasks] = useState<taskT[]>([]);
   const [open, setOpen] = useState(false);
   const [activeTaskKey, setActiveTaskKey] = useState('');  //当前被激活的taskID
+
+  useEffect(() => {
+    getLatestList();
+  }, []);
+
+  const getLatestList = () => {
+    api(apiConfig.list.url).then(res => {
+      if (res.code === 1) {
+        const latestTasks = res.data.map((i: taskT) => {
+          return Object.assign(i, { endTime: dayjs(i.endTime) })
+        })
+        setTasks(latestTasks);
+      }
+      else { }
+    }).catch((e) => { console.log('Error:', e); });
+  }
 
   const activeTask = useMemo(() => {
     return tasks.find(i => i.taskID === activeTaskKey)
@@ -55,15 +71,16 @@ export default function TaskList() {
     }
 
     postApi(apiConfig.create.url, newTasks).then(data => {
-      setTasks([...tasks, newTasks])
+      getLatestList();
+      // setTasks([...tasks, newTasks])
       setCurTitle('');
       setIsCreate(false);
       setDDL(null);
       messageApi.open({
-      type: 'success',
-      content: '创建成功',
-      duration: 0.9,
-    })
+        type: 'success',
+        content: '创建成功',
+        duration: 0.9,
+      })
       console.log(data);
     })
   }
@@ -74,8 +91,20 @@ export default function TaskList() {
   }
 
   const handleDelete = (key: string) => { //删除任务
-    setActiveTaskKey(key)
-    setTasks(tasks.filter(i => i.taskID !== key))
+    // setActiveTaskKey(key)
+    postApi(apiConfig.remove.url,{taskID:key}).then(res=>{
+      if(res.code===1){
+        getLatestList();
+        messageApi.open({
+        type: 'success',
+        content: '删除成功',
+        duration: 0.9,
+      })
+      }else{
+        message.error(res.msg);
+      }
+    })
+    // setTasks(tasks.filter(i => i.taskID !== key))
   }
 
   const handleFinish = (key: string) => {  //完成任务

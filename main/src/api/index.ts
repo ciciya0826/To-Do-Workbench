@@ -1,7 +1,7 @@
 const localServer = "http://127.0.0.1:3000"
 
 export const api=(url:string)=>{
-    return fetch(localServer+url).then(response => response.json()); // 解析 JSON 数据
+    return fetch(localServer+url,).then(response => response.json()); // 解析 JSON 数据
 }
 
 export const getApi=(url:string,data:any)=>{
