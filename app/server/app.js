@@ -9,6 +9,16 @@ var usersRouter = require('./routes/users');
 
 var app = express();
 
+//解决跨域问题
+const cors = require('cors');
+app.use(cors({
+  origin: 'http://localhost:8000',  // 允许的前端地址
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],  // 允许的方法
+  allowedHeaders: ['Content-Type', 'Authorization'],  // 允许的请求头
+  exposedHeaders: ['myHeader'],  // 暴露的自定义响应头
+  credentials: true // 如果需要携带 cookie
+}));
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -36,6 +46,14 @@ app.use(function(err, req, res, next) {
   // render the error page
   res.status(err.status || 500);
   res.render('error');
+  
 });
+
+app.put('/list',(res,req) => {
+    req.header('Access-Control-Allow-Origin','http://127.0.0.1:5500')
+    req.header('Access-Control-Expose-Headers', '*');
+    req.header('myHeader',"hello world")
+    req.send(listData)
+})
 
 module.exports = app;

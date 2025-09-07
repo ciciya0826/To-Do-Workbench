@@ -1,7 +1,7 @@
 .menu-item {
     width: 100%;
     height: 50px;
-    padding: 6px 5px;
+    padding: 6px 10px;
     border: 0;
     background: white;
     box-shadow: 0 0 1px 1px #b6b5b5;
@@ -10,6 +10,8 @@
     transition: all 0.2s;
     text-align: left;
     position: relative;
+    display: flex;
+    align-items: center;
 
     &-active {
         background-color: rgb(212, 227, 243);
@@ -26,6 +28,7 @@
 
     &_name {
         font-size: 18px;
+        line-height: 30px;
     }
 
     &_count {
@@ -43,4 +46,7 @@
         transform: translateY(-50%);
         font-weight: bolder;
     }
+}
+.my-icon{
+    margin-right: 5px;
 }

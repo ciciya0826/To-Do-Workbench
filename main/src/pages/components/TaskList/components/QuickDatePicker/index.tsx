@@ -1,11 +1,12 @@
 import './index.less'
 import { quickTimeConfig } from '../../config';
 import { Tag, DatePicker } from 'antd';
-import moment,{ Moment } from 'moment';
+import dayjs, { Dayjs } from 'dayjs';
+
 
 interface iDate {
-    value?: Moment|null
-    onChange?:(value:Moment|null)=>void
+    value?: Dayjs|null
+    onChange?:(value:Dayjs|null)=>void
 }
 
 export default function QuickDatePicker(props: iDate) {
@@ -15,7 +16,7 @@ export default function QuickDatePicker(props: iDate) {
         console.log('onOk: ', value);
     };
     const handleQuickCreate = (value: number) => {
-        let time = moment().add(value, 'd');
+        let time = dayjs().add(value, 'd');
         onChange?.(time);
       }
 

@@ -6,7 +6,7 @@ interface IitemButton{
     count:number,
     active:boolean,
     onclick:()=>void,
-    icon?:ReactNode,
+    icon:ReactNode,
 }
 
 export default function MenuItem(props:IitemButton) {
@@ -14,6 +14,7 @@ export default function MenuItem(props:IitemButton) {
   return (
     //active为true时，最终类名为："menu-item menu-item-active"
     <button className={`menu-item ${active ? 'menu-item-active' : ''}`} onClick={onclick}>  
+        {icon}
         <span className='menu-item_name'>{name}</span>
         <span className='menu-item_count'>{count}</span>
     </button>    

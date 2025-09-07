@@ -10,11 +10,12 @@ interface iTaskItem {
   // status: 'doing' | 'finished'
   active: boolean
   onClick:()=>void
+  onDelete:()=>void
   onFinish:()=>void
 }
 
 export default function TaskItem(props: iTaskItem) {
-  const { title, desc, endTime, active=false, onClick, onFinish} = props
+  const { title, desc, endTime, active=false, onClick,onDelete, onFinish} = props
 
   return (
     <div className='task-item'>
@@ -25,7 +26,7 @@ export default function TaskItem(props: iTaskItem) {
       </div>
       <div className='task-item_status'>
         <button className='task-item_finish-btn' onClick={onFinish}>完成</button>
-        <button className='task-item_delete-btn' onClick={onClick}>删除</button>
+        <button className='task-item_delete-btn' onClick={onDelete}>删除</button>
       </div>
     </div >
   );

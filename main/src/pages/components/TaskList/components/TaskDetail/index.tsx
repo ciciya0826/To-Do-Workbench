@@ -2,13 +2,13 @@ import { useEffect, useMemo, useState } from 'react';
 import './index.less'
 import { Drawer, Form, Input, Button } from 'antd';
 import QuickDatePicker from '../QuickDatePicker';
-import { Moment } from 'moment';
+import { Dayjs } from 'dayjs';
 
 interface iDrawer {
     task?: TaskT
     onClose: () => void
     open: boolean
-    onConfirm:(taskID:string,title:string,desc:string,endTime:Moment|null)=>void
+    onConfirm:(taskID:string,title:string,desc:string,endTime:Dayjs|null)=>void
 }
 
 export default function TaskDetail(props: iDrawer) {
@@ -16,7 +16,7 @@ export default function TaskDetail(props: iDrawer) {
     const { TextArea } = Input;
     const [title, setTitle] = useState('');
     const [desc, setDesc] = useState('');
-    const [realDDL, setRealDDL] = useState<Moment | null>(null);
+    const [realDDL, setRealDDL] = useState<Dayjs | null>(null);
 
     useEffect(() => {
         if (open && task) {  //刚打开
@@ -54,7 +54,7 @@ export default function TaskDetail(props: iDrawer) {
         >
             <Form onFinish={onFinish} onFinishFailed={onFinishFailed}>
                 <Form.Item>
-                    <QuickDatePicker value={realDDL} onChange={(val: Moment | null) => setRealDDL(val)} />
+                    <QuickDatePicker value={realDDL} onChange={(val: Dayjs | null) => setRealDDL(val)} />
                 </Form.Item>
                 <Form.Item>
                     <TextArea

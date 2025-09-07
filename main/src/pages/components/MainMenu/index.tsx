@@ -15,6 +15,7 @@ export default function MainMenu() {
                     name={i.name}
                     count={i.count}
                     active={ activeKey === i.key }
+                    icon={i.icon}
                     key={i.key}
                     onclick={() => setActiveKey(i.key)} />)
             })}
