@@ -9,66 +9,8 @@
 
 .task-list {
     flex: 1; // 占据剩余空间
-    padding-top: 15px;
+    // padding-top: 15px;
     box-sizing: border-box;
     overflow: auto;
 }
 
-.add-task-btn {
-    box-shadow: 0 0 1px 1px #b6b5b5;
-    border-radius: 2px;
-    padding-top: 15px;
-    padding-bottom: 15px;
-    margin-bottom: 10px;
-    align-items: center;
-    /* 水平方向居中所有子元素 */
-    box-shadow: 0 0 1px 1px #b6b5b5;
-    transition: all 0.2s;
-
-    &:hover {
-        box-shadow: 0 0 2px 2px #b8b8b8;
-    }
-
-    &_inner {
-        display: flex;
-        margin-left: 10px;
-        flex: 1;
-        align-items: center;
-
-        /* 水平方向居中所有子元素 */
-        .text {
-            margin-left: 5px;
-            margin-right: 15px;
-            font-size: 15px;
-        }
-    }
-
-    .tags {
-        cursor: pointer;
-        padding: 0 5px 0 5px;
-        font-size: 14px;
-        margin-left: 5px;
-        text-align: center;
-        line-height: box-size;
-    }
-    .tags-btn{
-        margin-left: 10px;
-        padding: 3px 0 3px 0;
-        align-items: center;
-    }
-
-    .datepicker {
-        margin-left: 15px;
-    }
-
-    .buttons{
-        margin-left: auto;
-        margin-right: 30px;
-    }
-
-    .tags-container {
-        display: flex;
-        align-items: center;
-        margin-top: 15px;
-    }
-}

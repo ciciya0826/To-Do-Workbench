@@ -7,5 +7,8 @@ export const apiConfig={
     },
     remove:{
         url:'/remove',
-    }
+    },
+    update:{
+        url:'/update',
+    },
 }

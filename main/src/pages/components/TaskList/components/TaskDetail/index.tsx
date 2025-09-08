@@ -3,12 +3,14 @@ import './index.less'
 import { Drawer, Form, Input, Button } from 'antd';
 import QuickDatePicker from '../QuickDatePicker';
 import { Dayjs } from 'dayjs';
+import { taskT } from '../..';
+import { TASK_STATUS } from '@/const';
 
 interface iDrawer {
-    task?: TaskT
+    task?: taskT
     onClose: () => void
     open: boolean
-    onConfirm:(taskID:string,title:string,desc:string,endTime:Dayjs|null)=>void
+    onConfirm:(taskID:string,title:string,desc:string,startTime:Dayjs|null,endTime:Dayjs|null,status:0|1)=>void
 }
 
 export default function TaskDetail(props: iDrawer) {
@@ -28,7 +30,7 @@ export default function TaskDetail(props: iDrawer) {
     const handleTitleChange = (e: any) => {
         setTitle(e.target.value);
     }
-    const renderTitle = (task?: TaskT) => {
+    const renderTitle = (task?: taskT) => {
         return (
             <Input value={title} onChange={handleTitleChange} size='large'/>
         )
@@ -42,7 +44,7 @@ export default function TaskDetail(props: iDrawer) {
     const onFinishFailed= (e:any) => {
         console.log('Failed:', e);
       };
-    const onDescChange = (e) => {
+    const onDescChange = (e:any) => {
         setDesc(e.target.value)
     };
 
@@ -65,7 +67,7 @@ export default function TaskDetail(props: iDrawer) {
                     />
                 </Form.Item>
                 <Form.Item>
-                    <Button type="primary" htmlType="submit" block size='large' onClick={()=>onConfirm(task.taskID,title,desc,realDDL)}>确认</Button>
+                    <Button type="primary" htmlType="submit" block size='large' onClick={()=>onConfirm(task?.taskID||'',title,desc,task?.startTime||null,realDDL,0)}>确认</Button>
                 </Form.Item>
             </Form>
         </Drawer>

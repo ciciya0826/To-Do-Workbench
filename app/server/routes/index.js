@@ -10,7 +10,12 @@ router.get('/', function (req, res, next) {
 
 //更新任务列表
 router.get('/list', function (req, res, next) {
-  const dbFile = path.join(__dirname, '..', 'db', 'DOING.json')
+  const type=req.query.tab;
+  console.log('type=',type)
+  const dbPath=path.join(__dirname, '..', 'db')
+  const dbFile = type==='0' ? `${dbPath}\\DOING.json` : `${dbPath}\\DONE.json`
+  // const dbPath=path.join(__dirname, '..', 'db')
+  // const dbFile = req.query===0 ? path.join(dbPath,'DOING.json'):path.join(dbPath,'DONE.json');
   fs.readFile(dbFile, 'utf8', (rerr, content) => {
     if (rerr) { //读文件错误
       res.send({
@@ -86,13 +91,13 @@ router.post('/remove', function (req, res, next) {
     let newTasks;
     const data = dataStr ? JSON.parse(dataStr) : null;
     const removeTarget = data.find(i => i.taskID === taskID);
-    if(data.length===0 || !removeTarget){
+    if (data.length === 0 || !removeTarget) {
       res.send({
-      data: '',
-      code: 0,
-      msg: '无效'
-    });
-    return;
+        data: '',
+        code: 0,
+        msg: '无效'
+      });
+      return;
     }
     newTasks = JSON.stringify(data.filter(i => i.taskID !== taskID));
     fs.writeFile(dbFile, newTasks, werr => {
@@ -110,6 +115,103 @@ router.post('/remove', function (req, res, next) {
         msg: ''
       });
     });
+  });
+});
+
+//编辑任务
+router.post('/update', function (req, res, next) {
+  const doingFile = path.join(__dirname, '..', 'db', 'DOING.json')
+  const doneFile = path.join(__dirname, '..', 'db', 'DONE.json')
+  const updateTask = req.body;
+  const taskID = req.body?.taskID;
+  if (!updateTask) {
+    res.send({
+      data: '',
+      code: 0,
+      msg: '编辑任务为空'
+    });
+    return;
+  }
+  fs.readFile(doingFile, 'utf8', (rerr, doingDataStr) => {
+    if (rerr) { //读文件错误
+      res.send({
+        data: '',
+        code: 0,
+        msg: rerr
+      })
+      return;
+    }
+    let newDoingTasks, newDoneTasks;
+    const doingData = doingDataStr ? JSON.parse(doingDataStr) : null;
+    const target = doingData.find(i => i.taskID === taskID); //找到点击的任务
+    if (doingData.length === 0 || !target) {
+      res.send({
+        data: '',
+        code: 0,
+        msg: '任务错误'
+      });
+      return;
+    }
+    if (updateTask.status === 0) {
+      newDoingTasks = doingData.filter(i => i.taskID !== taskID)
+      newDoingTasks = JSON.stringify([...newDoingTasks, updateTask]);
+      fs.writeFile(doingFile, newDoingTasks, werr => {
+        if (werr) {
+          res.send({
+            data: '',
+            code: 0,
+            msg: werr
+          })
+          return;
+        }
+        res.send({
+          data: newDoingTasks,
+          code: 1,
+          msg: ''
+        });
+      });
+    } else {
+      fs.readFile(doneFile, 'utf8', (rerr, doneDataStr) => {
+        if (rerr) { //读文件错误
+          res.send({
+            data: '',
+            code: 0,
+            msg: rerr
+          })
+          return;
+        }
+        const doneData = JSON.parse(doneDataStr);
+        const newTask=doingData.find(i=>i.taskID===taskID);
+        newDoingTasks = JSON.stringify(doingData.filter(i => i.taskID !== taskID));
+        doneData.push(newTask);
+        newDoneTasks = JSON.stringify(doneData);
+        fs.writeFile(doingFile, newDoingTasks, werr => {
+          if (werr) {
+            res.send({
+              data: '',
+              code: 0,
+              msg: werr
+            })
+            return;
+          }
+        });
+        fs.writeFile(doneFile, newDoneTasks, werr => {
+          if (werr) {
+            res.send({
+              data: '',
+              code: 0,
+              msg: werr
+            })
+            return;
+          }
+          res.send({
+            data: newDoneTasks,
+            code: 1,
+            msg: ''
+          });
+        });
+      });
+    }
   });
 });
 

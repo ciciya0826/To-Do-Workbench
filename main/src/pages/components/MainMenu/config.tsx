@@ -4,7 +4,7 @@ import { icons } from "antd/es/image/PreviewGroup";
 const Config=[
     {
         name:'进行中',
-        key:'doing',
+        key:0,
         count:1,
         icon:(<span className="my-icon">
             <DoingIcon/>
@@ -12,7 +12,7 @@ const Config=[
     },
     {
         name:'已完成',
-        key:'finished',
+        key:1,
         count:10,
         icon:(<span className="my-icon">
             <DoneIcon/>

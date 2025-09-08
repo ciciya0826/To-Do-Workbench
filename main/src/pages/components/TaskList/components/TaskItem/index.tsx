@@ -1,27 +1,28 @@
 import { Moment } from 'moment';
 import './index.less';
 import { useState } from 'react';
+import { Dayjs } from 'dayjs';
 
 interface iTaskItem {
   title: string
   desc: string
   // startTime: string
-  endTime: Moment
+  endTime: Dayjs | null
   // status: 'doing' | 'finished'
   active: boolean
-  onClick:()=>void
-  onDelete:()=>void
-  onFinish:()=>void
+  onClick: () => void
+  onDelete: () => void
+  onFinish: () => void
 }
 
 export default function TaskItem(props: iTaskItem) {
-  const { title, desc, endTime, active=false, onClick,onDelete, onFinish} = props
+  const { title, desc, endTime, active = false, onClick, onDelete, onFinish } = props
 
   return (
     <div className='task-item'>
-      <div className={`task-item_info ${active?'task-item_info--active':''}`} onClick={onClick}>
+      <div className={`task-item_info ${active ? 'task-item_info--active' : ''}`} onClick={onClick}>
         <div className='task-item_title'>{title}</div>
-        <div className='task-item_ddl'>{endTime}</div>
+        <div className='task-item_ddl'>{endTime ? endTime.format('YYYY-MM-DD HH:mm:ss') : null}</div>
         {/* <div className='task-item_desc'>{desc}</div> */}
       </div>
       <div className='task-item_status'>

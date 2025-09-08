@@ -2,9 +2,15 @@ import './index.less';
 import MenuItem from './MenuItem';
 import Config from './config';
 import { useState } from 'react';
+import { tabKey } from '@/const';
 
-export default function MainMenu() {
-    const[activeKey,setActiveKey]=useState('doing')
+interface iprops{
+    activeKey:number;
+    onClick:(key:number)=>void;
+}
+
+export default function MainMenu(props:iprops) {
+    const {activeKey,onClick}=props;
     return (
         <div className='main-menu'>
             <div>
@@ -17,7 +23,7 @@ export default function MainMenu() {
                     active={ activeKey === i.key }
                     icon={i.icon}
                     key={i.key}
-                    onclick={() => setActiveKey(i.key)} />)
+                    onclick={() => onClick(i.key)} />)
             })}
         </div>
     );

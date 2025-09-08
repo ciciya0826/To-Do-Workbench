@@ -1,38 +1,42 @@
 import { PlusIcon } from '@/assets/icons/PlusIcon';
 import './index.less';
 import TaskItem from './components/TaskItem';
-import { DatePicker, Input, Tag, Button, message } from 'antd';
+import { message } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
-import { quickTimeConfig } from './config';
 import TaskDetail from './components/TaskDetail';
 import dayjs, { Dayjs } from 'dayjs';
 import { api, getApi, postApi } from '@/api';
 import { apiConfig } from '@/api/config';
+import { tabKey, TASK_STATUS } from '@/const';
+import TaskCreator from './components/TaskCreater';
 
-export default function TaskList() {
+export type taskT = {
+  taskID: string;
+  title: string;
+  desc: string;
+  startTime: Dayjs | null;
+  endTime: Dayjs | null;
+  status: number;
+}
 
-  type taskT = {
-    taskID: string
-    title: string
-    desc: string
-    //startTime: Moment
-    endTime: Dayjs
-  }
+interface iprops {
+  activeKey: number,
+}
 
+export default function TaskList(props: iprops) {
+  const { activeKey } = props;
   const [messageApi, contextHolder] = message.useMessage();
-  const [isCreate, setIsCreate] = useState(false);  //是否继续展示DatePicker和tags
-  const [DDL, setDDL] = useState<Dayjs | null>(null);
-  const [curTitle, setCurTitle] = useState<string>('');
   const [tasks, setTasks] = useState<taskT[]>([]);
   const [open, setOpen] = useState(false);
   const [activeTaskKey, setActiveTaskKey] = useState('');  //当前被激活的taskID
 
   useEffect(() => {
-    getLatestList();
-  }, []);
+    getLatestList(activeKey);
+  }, [activeKey]);
 
-  const getLatestList = () => {
-    api(apiConfig.list.url).then(res => {
+  //获取最新列表
+  const getLatestList = (activeKey: number) => {
+    getApi(apiConfig.list.url, { tab: activeKey }).then(res => {
       if (res.code === 1) {
         const latestTasks = res.data.map((i: taskT) => {
           return Object.assign(i, { endTime: dayjs(i.endTime) })
@@ -47,35 +51,16 @@ export default function TaskList() {
     return tasks.find(i => i.taskID === activeTaskKey)
   }, [tasks, activeTaskKey]);
 
-  const onChange = (value: any, dateString: string | string[]) => {
-    console.log('Selected Time: ', value);
-    console.log('Formatted Selected Time: ', dateString);
-    setDDL(value);
-  }
-  const onOk = (value: any) => {
-    console.log('onOk: ', value);
-  };
 
-  const handleQuickCreate = (value: number) => {
-    let time = dayjs().add(value, 'day');
-    setDDL(time);
-  }
 
-  const handleCreate = () => {  //创建任务
-    const taskid = Date.now().toString();
-    const newTasks = {
-      taskID: taskid,
-      title: curTitle,
-      desc: '',
-      endTime: DDL
-    }
-
+  //创建任务
+  const handleCreate = (newTasks: taskT) => {
     postApi(apiConfig.create.url, newTasks).then(data => {
-      getLatestList();
+      getLatestList(0);
       // setTasks([...tasks, newTasks])
-      setCurTitle('');
-      setIsCreate(false);
-      setDDL(null);
+      // setCurTitle('');
+      // setIsCreate(false);
+      // setDDL(null);
       messageApi.open({
         type: 'success',
         content: '创建成功',
@@ -85,45 +70,81 @@ export default function TaskList() {
     })
   }
 
-  const OpenTask = (taskID: string) => {  //打开侧边栏
+  //打开侧边栏
+  const OpenTask = (taskID: string) => {
     setOpen(true);
     setActiveTaskKey(taskID)
   }
 
-  const handleDelete = (key: string) => { //删除任务
+  //删除任务
+  const handleDelete = (key: string) => {
     // setActiveTaskKey(key)
-    postApi(apiConfig.remove.url,{taskID:key}).then(res=>{
-      if(res.code===1){
-        getLatestList();
+    postApi(apiConfig.remove.url, { taskID: key }).then(res => {
+      if (res.code === 1) {
+        getLatestList(0);
         messageApi.open({
-        type: 'success',
-        content: '删除成功',
-        duration: 0.9,
-      })
-      }else{
+          type: 'success',
+          content: '删除成功',
+          duration: 0.9,
+        })
+      } else {
         message.error(res.msg);
       }
     })
     // setTasks(tasks.filter(i => i.taskID !== key))
   }
 
-  const handleFinish = (key: string) => {  //完成任务
-    setActiveTaskKey(key)
-    setTasks(tasks.filter(i => i.taskID !== key))
+  //完成任务
+  const handleFinish = (key: string) => {
+    postApi(apiConfig.update.url, {
+      taskID: key,
+      status: TASK_STATUS.DONE,
+    }).then(res => {
+      if (res.code === 1) {
+        getLatestList(0);
+        messageApi.open({
+          type: 'success',
+          content: '修改成功',
+          duration: 0.9,
+        });
+      } else {
+        message.error(res.msg);
+      }
+    })
+    // setActiveTaskKey(key)
+    // setTasks(tasks.filter(i => i.taskID !== key))
   }
-  const onConfirm = (taskID: string, title: string, desc: string, endTime: Moment | null) => {
+
+  //侧边栏中确认修改
+  const onConfirm = (taskID: string, title: string, desc: string, startTime: Dayjs | null, endTime: Dayjs | null, status: 0 | 1) => {
     setOpen(false);
-    setTasks([...tasks.filter(i => i.taskID !== taskID), {
-      taskID: Date.now().toString(),
+    postApi(apiConfig.update.url, {
+      taskID: taskID,
       title: title,
       desc: desc,
-      endTime: endTime
-    }]);
-    messageApi.open({
-      type: 'success',
-      content: '修改成功',
-      duration: 0.9,
-    });
+      startTime: startTime,
+      endTime: endTime,
+      status: TASK_STATUS.DOING,
+    }).then(res => {
+      if (res.code === 1) {
+        getLatestList(0);
+        messageApi.open({
+          type: 'success',
+          content: '任务完成',
+          duration: 0.9,
+        });
+      } else {
+        message.error(res.msg);
+      }
+    })
+    // setTasks([...tasks.filter(i => i.taskID !== taskID), {
+    //   taskID: Date.now().toString(),
+    //   title: title,
+    //   desc: desc,
+    //   startTime:startTime,
+    //   endTime: endTime,
+    //   status:0,
+    // }]);
   }
 
   return (
@@ -131,35 +152,14 @@ export default function TaskList() {
       {contextHolder}
       <div className='task-container'>
         <h1 className='title'>任务列表</h1>
-        <div className='add-task-btn'>
-          <div className='add-task-btn_inner'>
-            <PlusIcon />
-            <Input className='text' placeholder='创建任务' value={curTitle} onChange={(e) => setCurTitle(e.target.value)} onFocus={() => setIsCreate(true)} />
-          </div>
-          {isCreate && <div className='tags-container'>
-            <div className='tags-btn'>
-              {quickTimeConfig.map(i => (
-                <Tag key={i.offset} className='tags' color={i.color} onClick={() => handleQuickCreate(i.offset)}>{i.title}</Tag>
-              ))}
-            </div>
-            <DatePicker value={DDL} className='datepicker' showTime onChange={onChange} onOk={onOk} placeholder='选择任务截止日期' />
-            <div className='buttons'>
-              <Button className='cancel-btn' onClick={() => {
-                setCurTitle('');
-                setIsCreate(false);
-                setDDL(null);
-              }}>取消</Button>
-              <Button type="primary" className='confirm-btn' onClick={handleCreate} disabled={curTitle === '' || DDL === null} >确认添加</Button>
-            </div>
-          </div>}
-        </div>
+        {activeKey === tabKey.DOING&&<TaskCreator onCreate={handleCreate} />}
         <div className='task-list'>
           {tasks.map((task) => (
             <TaskItem
               key={task.taskID}
               title={task.title}
               desc={task.desc}
-              endTime={task.endTime.format('YYYY-MM-DD HH:mm:ss')}
+              endTime={task.endTime ? task.endTime : null}
               onClick={() => OpenTask(task.taskID)}
               active={activeTaskKey === task.taskID}
               onFinish={() => handleFinish(task.taskID)}
