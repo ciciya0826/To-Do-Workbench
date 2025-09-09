@@ -1,4 +1,3 @@
-import { PlusIcon } from '@/assets/icons/PlusIcon';
 import './index.less';
 import TaskItem from './components/TaskItem';
 import { Empty, message } from 'antd';
@@ -17,6 +16,7 @@ export type taskT = {
   startTime: Dayjs | null;
   endTime: Dayjs | null;
   status: number;
+  finishTime:Dayjs |null;
 }
 
 interface iprops {
@@ -30,7 +30,6 @@ export default function TaskList(props: iprops) {
   const [messageApi, contextHolder] = message.useMessage();
   const [tasks, setTasks] = useState<taskT[]>([]);
   const [open, setOpen] = useState(false);
-  
   const [activeTaskKey, setActiveTaskKey] = useState('');  //当前被激活的taskID
 
   useEffect(() => {
@@ -96,11 +95,12 @@ export default function TaskList(props: iprops) {
   }
 
   //完成任务 activeKey在哪种列表 status写入哪个文件
-  const handleFinish = (key: string, activeKey: number) => {
+  const handleFinish = (key: string, activeKey: number,finishTime:Dayjs|null) => {
     postApi(apiConfig.update.url, {
       taskID: key,
       status: !activeKey,
       tab: activeKey,
+      finishTime:finishTime,
     }).then(res => {
       if (res.code === 1) {
         getLatestList(activeKey);
@@ -116,7 +116,7 @@ export default function TaskList(props: iprops) {
   }
 
   //侧边栏中确认修改
-  const onConfirm = (taskID: string, title: string, desc: string, startTime: Dayjs | null, endTime: Dayjs | null, activeKey: number) => {
+  const onConfirm = (taskID: string, title: string, desc: string, startTime: Dayjs | null, endTime: Dayjs | null, activeKey: number,finishTime:Dayjs |null) => {
     setOpen(false);
     postApi(apiConfig.update.url, {
       taskID: taskID,
@@ -126,6 +126,7 @@ export default function TaskList(props: iprops) {
       endTime: endTime,
       status: activeKey,
       tab:activeKey,
+      finishTime:finishTime,
     }).then(res => {
       if (res.code === 1) {
         getLatestList(activeKey);
@@ -140,11 +141,13 @@ export default function TaskList(props: iprops) {
     })
   }
 
+  
+
   return (
     <>
       {contextHolder}
       <div className='task-container'>
-        <h1 className='title'>任务列表</h1>
+        <h1 className='title'>//</h1>
         {activeKey === tabKey.DOING && <TaskCreator onCreate={handleCreate} />}
         <div className='task-list'>
           {tasks.length===0&&<Empty description={activeKey===0?'暂无正在进行中的任务':'还没有完成过任务哦'}/>}
@@ -156,8 +159,10 @@ export default function TaskList(props: iprops) {
               endTime={task.endTime ? task.endTime : null}
               onClick={() => OpenTask(task.taskID)}
               active={activeTaskKey === task.taskID}
-              onFinish={() => handleFinish(task.taskID, activeKey)}
+              onFinish={() => handleFinish(task.taskID, activeKey,dayjs())}
               onDelete={() => handleDelete(task.taskID, activeKey)}
+              activeKey={activeKey}
+              finishTime={task.finishTime ? task.finishTime : null}
             />
           ))}
         </div>

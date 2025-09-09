@@ -1,11 +1,13 @@
 .menu-item {
     width: 100%;
     height: 50px;
-    padding: 6px 10px;
+    padding-left: 15px;
+    // padding: 6px 10px;
     border: 0;
     background: white;
-    box-shadow: 0 0 1px 1px #b6b5b5;
-    border-radius: 2px;
+    box-shadow: 0 0 1px 1px rgb(200, 208, 245);
+    ;
+    border-radius: 5px;
     cursor: pointer;
     transition: all 0.2s;
     text-align: left;
@@ -14,8 +16,25 @@
     align-items: center;
 
     &-active {
-        background-color: rgb(212, 227, 243);
-        color: rgb(138, 63, 208);
+        transition: 0.3s;
+        margin-left: 20px;
+        background-color: rgb(101, 129, 251);
+        color: rgb(255, 255, 255);
+        border-radius: 30px 0 0 30px;
+        position: relative;
+
+        //右下角三角形
+        &::after {
+            content: ''; /* 伪元素必须设置的空内容 */
+            position: absolute; 
+            bottom: -8px; /* 与容器顶部对齐 */
+            right: 0px; /* 与容器左侧对齐 */
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 8px 8px 0 0; /*三角形大小*/
+            border-color: rgb(101, 129, 251) transparent transparent transparent; /* 三角形颜色 */
+        }
 
         .menu-item_name {
             font-weight: bolder;
@@ -23,7 +42,7 @@
     }
 
     &:hover {
-        box-shadow: 0 0 2px 2px #b8b8b8;
+        box-shadow: 0 0 2px 2px rgb(210, 211, 211);
     }
 
     &_name {
@@ -47,6 +66,7 @@
         font-weight: bolder;
     }
 }
-.my-icon{
+
+.my-icon {
     margin-right: 5px;
 }

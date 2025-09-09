@@ -36,7 +36,7 @@ export default function MainMenu(props: iprops) {
     return (
         <div className='main-menu'>
             <div>
-                <h1 className='title'>主菜单</h1>
+                {/* <h1 className='title'>//</h1> */}
             </div>
             {Config.map((i) => {
                 return (<MenuItem

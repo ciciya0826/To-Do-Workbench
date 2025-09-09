@@ -127,6 +127,7 @@ router.post('/update', function (req, res, next) {
   const doneFile = path.join(__dirname, '..', 'db', 'DONE.json')
   const updateTask = req.body;
   const taskID = req.body?.taskID;
+  const finishTime=req.body.finishTime;
   const status = Number(req.body.status);
   const tab = req.body.tab;
   const readFile = tab === 0 ? doingFile : doneFile;  //要读的文件
@@ -194,7 +195,9 @@ router.post('/update', function (req, res, next) {
           return;
         }
         const writeData = JSON.parse(writeDataStr);
-        const newTask = readData.find(i => i.taskID === taskID);
+        let newTask;
+        newTask = readData.find(i => i.taskID === taskID);
+        newTask=Object.assign(newTask,updateTask);
         newReadTasks = JSON.stringify(readData.filter(i => i.taskID !== taskID));
         writeData.push(newTask);
         newWriteTasks = JSON.stringify(writeData);

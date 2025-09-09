@@ -38,6 +38,7 @@ export default function TaskCreator(props: iprops) {
             startTime: DDL,
             endTime: DDL,
             status: TASK_STATUS.DOING,
+            finishTime:null,
         }
         onCreate(newTasks);
         setCurTitle('');

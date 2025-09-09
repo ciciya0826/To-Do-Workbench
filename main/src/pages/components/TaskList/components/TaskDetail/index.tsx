@@ -11,7 +11,7 @@ interface iDrawer {
     activeKey:number
     onClose: () => void
     open: boolean
-    onConfirm:(taskID:string,title:string,desc:string,startTime:Dayjs|null,endTime:Dayjs|null,status:number)=>void
+    onConfirm:(taskID:string,title:string,desc:string,startTime:Dayjs|null,endTime:Dayjs|null,status:number,finishTime:Dayjs|null)=>void
 }
 
 export default function TaskDetail(props: iDrawer) {
@@ -68,7 +68,7 @@ export default function TaskDetail(props: iDrawer) {
                     />
                 </Form.Item>
                 <Form.Item>
-                    <Button type="primary" htmlType="submit" block size='large' onClick={()=>onConfirm(task?.taskID||'',title,desc,task?.startTime||null,realDDL,activeKey)}>确认</Button>
+                    <Button type="primary" htmlType="submit" block size='large' onClick={()=>onConfirm(task?.taskID||'',title,desc,task?.startTime||null,realDDL,activeKey,task?.finishTime||null)}>确认</Button>
                 </Form.Item>
             </Form>
         </Drawer>
