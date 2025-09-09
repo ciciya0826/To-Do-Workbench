@@ -16,7 +16,7 @@ export default function MenuItem(props:IitemButton) {
     <button className={`menu-item ${active ? 'menu-item-active' : ''}`} onClick={onclick}>  
         {icon}
         <span className='menu-item_name'>{name}</span>
-        <span className='menu-item_count'>{count}</span>
+        {count>0&&<span className='menu-item_count'>{count}</span>}
     </button>    
 );
 }

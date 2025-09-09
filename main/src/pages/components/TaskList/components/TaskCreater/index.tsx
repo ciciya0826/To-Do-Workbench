@@ -8,11 +8,11 @@ import { TASK_STATUS } from '@/const';
 import { taskT } from '../..';
 
 interface iprops {
-    onCreate:(task:taskT)=>void
+    onCreate: (task: taskT) => void
 }
 
 export default function TaskCreator(props: iprops) {
-    const {onCreate}=props;
+    const { onCreate } = props;
     const [isCreate, setIsCreate] = useState(false);  //是否继续展示DatePicker和tags
     const [DDL, setDDL] = useState<Dayjs | null>(null);
     const [curTitle, setCurTitle] = useState<string>('');
@@ -40,6 +40,9 @@ export default function TaskCreator(props: iprops) {
             status: TASK_STATUS.DOING,
         }
         onCreate(newTasks);
+        setCurTitle('');
+        setIsCreate(false);
+        setDDL(null);
     }
 
     return (

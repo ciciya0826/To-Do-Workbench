@@ -1,7 +1,7 @@
 import { PlusIcon } from '@/assets/icons/PlusIcon';
 import './index.less';
 import TaskItem from './components/TaskItem';
-import { message } from 'antd';
+import { Empty, message } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import TaskDetail from './components/TaskDetail';
 import dayjs, { Dayjs } from 'dayjs';
@@ -21,17 +21,21 @@ export type taskT = {
 
 interface iprops {
   activeKey: number,
+  isChange:boolean,
+  onClick: (key: boolean) => void;
 }
 
 export default function TaskList(props: iprops) {
-  const { activeKey } = props;
+  const { activeKey,isChange,onClick } = props;
   const [messageApi, contextHolder] = message.useMessage();
   const [tasks, setTasks] = useState<taskT[]>([]);
   const [open, setOpen] = useState(false);
+  
   const [activeTaskKey, setActiveTaskKey] = useState('');  //当前被激活的taskID
 
   useEffect(() => {
     getLatestList(activeKey);
+    // onClick(!isChange);
   }, [activeKey]);
 
   //获取最新列表
@@ -42,6 +46,7 @@ export default function TaskList(props: iprops) {
           return Object.assign(i, { endTime: dayjs(i.endTime) })
         })
         setTasks(latestTasks);
+        onClick(!isChange);
       }
       else { }
     }).catch((e) => { console.log('Error:', e); });
@@ -50,8 +55,6 @@ export default function TaskList(props: iprops) {
   const activeTask = useMemo(() => {
     return tasks.find(i => i.taskID === activeTaskKey)
   }, [tasks, activeTaskKey]);
-
-
 
   //创建任务
   const handleCreate = (newTasks: taskT) => {
@@ -77,11 +80,10 @@ export default function TaskList(props: iprops) {
   }
 
   //删除任务
-  const handleDelete = (key: string) => {
-    // setActiveTaskKey(key)
-    postApi(apiConfig.remove.url, { taskID: key }).then(res => {
+  const handleDelete = (key: string, activeKey: number) => {
+    postApi(apiConfig.remove.url, { taskID: key, tab: activeKey }).then(res => {
       if (res.code === 1) {
-        getLatestList(0);
+        getLatestList(res.data);
         messageApi.open({
           type: 'success',
           content: '删除成功',
@@ -91,17 +93,17 @@ export default function TaskList(props: iprops) {
         message.error(res.msg);
       }
     })
-    // setTasks(tasks.filter(i => i.taskID !== key))
   }
 
-  //完成任务
-  const handleFinish = (key: string) => {
+  //完成任务 activeKey在哪种列表 status写入哪个文件
+  const handleFinish = (key: string, activeKey: number) => {
     postApi(apiConfig.update.url, {
       taskID: key,
-      status: TASK_STATUS.DONE,
+      status: !activeKey,
+      tab: activeKey,
     }).then(res => {
       if (res.code === 1) {
-        getLatestList(0);
+        getLatestList(activeKey);
         messageApi.open({
           type: 'success',
           content: '修改成功',
@@ -111,12 +113,10 @@ export default function TaskList(props: iprops) {
         message.error(res.msg);
       }
     })
-    // setActiveTaskKey(key)
-    // setTasks(tasks.filter(i => i.taskID !== key))
   }
 
   //侧边栏中确认修改
-  const onConfirm = (taskID: string, title: string, desc: string, startTime: Dayjs | null, endTime: Dayjs | null, status: 0 | 1) => {
+  const onConfirm = (taskID: string, title: string, desc: string, startTime: Dayjs | null, endTime: Dayjs | null, activeKey: number) => {
     setOpen(false);
     postApi(apiConfig.update.url, {
       taskID: taskID,
@@ -124,10 +124,11 @@ export default function TaskList(props: iprops) {
       desc: desc,
       startTime: startTime,
       endTime: endTime,
-      status: TASK_STATUS.DOING,
+      status: activeKey,
+      tab:activeKey,
     }).then(res => {
       if (res.code === 1) {
-        getLatestList(0);
+        getLatestList(activeKey);
         messageApi.open({
           type: 'success',
           content: '任务完成',
@@ -137,14 +138,6 @@ export default function TaskList(props: iprops) {
         message.error(res.msg);
       }
     })
-    // setTasks([...tasks.filter(i => i.taskID !== taskID), {
-    //   taskID: Date.now().toString(),
-    //   title: title,
-    //   desc: desc,
-    //   startTime:startTime,
-    //   endTime: endTime,
-    //   status:0,
-    // }]);
   }
 
   return (
@@ -152,8 +145,9 @@ export default function TaskList(props: iprops) {
       {contextHolder}
       <div className='task-container'>
         <h1 className='title'>任务列表</h1>
-        {activeKey === tabKey.DOING&&<TaskCreator onCreate={handleCreate} />}
+        {activeKey === tabKey.DOING && <TaskCreator onCreate={handleCreate} />}
         <div className='task-list'>
+          {tasks.length===0&&<Empty description={activeKey===0?'暂无正在进行中的任务':'还没有完成过任务哦'}/>}
           {tasks.map((task) => (
             <TaskItem
               key={task.taskID}
@@ -162,12 +156,12 @@ export default function TaskList(props: iprops) {
               endTime={task.endTime ? task.endTime : null}
               onClick={() => OpenTask(task.taskID)}
               active={activeTaskKey === task.taskID}
-              onFinish={() => handleFinish(task.taskID)}
-              onDelete={() => handleDelete(task.taskID)}
+              onFinish={() => handleFinish(task.taskID, activeKey)}
+              onDelete={() => handleDelete(task.taskID, activeKey)}
             />
           ))}
         </div>
-        <TaskDetail task={activeTask} onClose={() => setOpen(false)} open={open} key={activeTaskKey} onConfirm={onConfirm} />
+        <TaskDetail task={activeTask} activeKey={activeKey} onClose={() => setOpen(false)} open={open} key={activeTaskKey} onConfirm={onConfirm} />
       </div>
     </>
   );

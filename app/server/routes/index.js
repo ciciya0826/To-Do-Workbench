@@ -10,12 +10,9 @@ router.get('/', function (req, res, next) {
 
 //更新任务列表
 router.get('/list', function (req, res, next) {
-  const type=req.query.tab;
-  console.log('type=',type)
-  const dbPath=path.join(__dirname, '..', 'db')
-  const dbFile = type==='0' ? `${dbPath}\\DOING.json` : `${dbPath}\\DONE.json`
-  // const dbPath=path.join(__dirname, '..', 'db')
-  // const dbFile = req.query===0 ? path.join(dbPath,'DOING.json'):path.join(dbPath,'DONE.json');
+  const type = req.query.tab;
+  const dbPath = path.join(__dirname, '..', 'db')
+  const dbFile = type === '0' ? `${dbPath}\\DOING.json` : `${dbPath}\\DONE.json`
   fs.readFile(dbFile, 'utf8', (rerr, content) => {
     if (rerr) { //读文件错误
       res.send({
@@ -62,14 +59,14 @@ router.post('/create', function (req, res, next) {
     });
     res.send(data);
   });
-  // res.send({
-  //   data: 'get post \'create\' ',
-  // });
+
 });
 
 //删除任务  
 router.post('/remove', function (req, res, next) {
-  const dbFile = path.join(__dirname, '..', 'db', 'DOING.json')
+  const type = req.body.tab;
+  const dbPath = path.join(__dirname, '..', 'db')
+  const dbFile = type === 0 ? `${dbPath}\\DOING.json` : `${dbPath}\\DONE.json`
   const taskID = req.body?.taskID;
   if (!taskID) {
     res.send({
@@ -91,6 +88,12 @@ router.post('/remove', function (req, res, next) {
     let newTasks;
     const data = dataStr ? JSON.parse(dataStr) : null;
     const removeTarget = data.find(i => i.taskID === taskID);
+    // console.log('req.query.tab:', type);
+    // console.log('taskID:', taskID);
+    // console.log('dbFile:', dbFile);
+    // console.log('dataStr',dataStr);
+    // console.log('data:', data);
+    // console.log('removeTarget', removeTarget);
     if (data.length === 0 || !removeTarget) {
       res.send({
         data: '',
@@ -110,7 +113,7 @@ router.post('/remove', function (req, res, next) {
         return;
       }
       res.send({
-        data: newTasks,
+        data: type,
         code: 1,
         msg: ''
       });
@@ -118,12 +121,18 @@ router.post('/remove', function (req, res, next) {
   });
 });
 
-//编辑任务
+//编辑任务  tab现在在哪个列表 status写入哪个文件
 router.post('/update', function (req, res, next) {
   const doingFile = path.join(__dirname, '..', 'db', 'DOING.json')
   const doneFile = path.join(__dirname, '..', 'db', 'DONE.json')
   const updateTask = req.body;
   const taskID = req.body?.taskID;
+  const status = Number(req.body.status);
+  const tab = req.body.tab;
+  const readFile = tab === 0 ? doingFile : doneFile;  //要读的文件
+  const writeFile = status === 0 ? doingFile : doneFile;  //要写入的文件
+  // console.log('stasus',status);
+  // console.log('tab',tab);
   if (!updateTask) {
     res.send({
       data: '',
@@ -132,7 +141,7 @@ router.post('/update', function (req, res, next) {
     });
     return;
   }
-  fs.readFile(doingFile, 'utf8', (rerr, doingDataStr) => {
+  fs.readFile(readFile, 'utf8', (rerr, readDataStr) => {
     if (rerr) { //读文件错误
       res.send({
         data: '',
@@ -141,10 +150,12 @@ router.post('/update', function (req, res, next) {
       })
       return;
     }
-    let newDoingTasks, newDoneTasks;
-    const doingData = doingDataStr ? JSON.parse(doingDataStr) : null;
-    const target = doingData.find(i => i.taskID === taskID); //找到点击的任务
-    if (doingData.length === 0 || !target) {
+    const readData = readDataStr ? JSON.parse(readDataStr) : null;
+    const target = readData.find(i => i.taskID === taskID); //找到点击的任务
+    // console.log('readData',readData);
+    // console.log('readData.lengtn',readData.length);
+    // console.log('target',target);
+    if (readData.length === 0 || !target) {
       res.send({
         data: '',
         code: 0,
@@ -152,10 +163,12 @@ router.post('/update', function (req, res, next) {
       });
       return;
     }
-    if (updateTask.status === 0) {
-      newDoingTasks = doingData.filter(i => i.taskID !== taskID)
-      newDoingTasks = JSON.stringify([...newDoingTasks, updateTask]);
-      fs.writeFile(doingFile, newDoingTasks, werr => {
+    let newReadTasks, newWriteTasks;
+    //编辑栏
+    if (status === tab) {
+      newReadTasks = readData.filter(i => i.taskID !== taskID)
+      newReadTasks = JSON.stringify([...newReadTasks, updateTask]);
+      fs.writeFile(writeFile, newReadTasks, werr => {
         if (werr) {
           res.send({
             data: '',
@@ -165,13 +178,13 @@ router.post('/update', function (req, res, next) {
           return;
         }
         res.send({
-          data: newDoingTasks,
+          data: newReadTasks,
           code: 1,
           msg: ''
         });
       });
-    } else {
-      fs.readFile(doneFile, 'utf8', (rerr, doneDataStr) => {
+    } else {  //完成栏
+      fs.readFile(writeFile, 'utf8', (rerr, writeDataStr) => {
         if (rerr) { //读文件错误
           res.send({
             data: '',
@@ -180,12 +193,12 @@ router.post('/update', function (req, res, next) {
           })
           return;
         }
-        const doneData = JSON.parse(doneDataStr);
-        const newTask=doingData.find(i=>i.taskID===taskID);
-        newDoingTasks = JSON.stringify(doingData.filter(i => i.taskID !== taskID));
-        doneData.push(newTask);
-        newDoneTasks = JSON.stringify(doneData);
-        fs.writeFile(doingFile, newDoingTasks, werr => {
+        const writeData = JSON.parse(writeDataStr);
+        const newTask = readData.find(i => i.taskID === taskID);
+        newReadTasks = JSON.stringify(readData.filter(i => i.taskID !== taskID));
+        writeData.push(newTask);
+        newWriteTasks = JSON.stringify(writeData);
+        fs.writeFile(readFile, newReadTasks, werr => {
           if (werr) {
             res.send({
               data: '',
@@ -195,7 +208,9 @@ router.post('/update', function (req, res, next) {
             return;
           }
         });
-        fs.writeFile(doneFile, newDoneTasks, werr => {
+        // console.log('readFile',readFile);
+        // console.log('writeFile',writeFile);
+        fs.writeFile(writeFile, newWriteTasks, werr => {
           if (werr) {
             res.send({
               data: '',
@@ -205,7 +220,7 @@ router.post('/update', function (req, res, next) {
             return;
           }
           res.send({
-            data: newDoneTasks,
+            data: newWriteTasks,
             code: 1,
             msg: ''
           });
@@ -213,6 +228,41 @@ router.post('/update', function (req, res, next) {
       });
     }
   });
+});
+
+//获取任务数量
+router.get('/count', function (req, res, next) {
+  const doingFile = path.join(__dirname, '..', 'db', 'DOING.json')
+  const doneFile = path.join(__dirname, '..', 'db', 'DONE.json')
+  fs.readFile(doingFile, 'utf8', (rerr, doingDataStr) => {
+    if (rerr) { //读文件错误
+      res.send({
+        data: '',
+        code: 0,
+        msg: rerr
+      })
+      return;
+    }
+    const doingData = doingDataStr ? JSON.parse(doingDataStr) : null;
+    fs.readFile(doneFile, 'utf8', (rerr, doneDataStr) => {
+      if (rerr) { //读文件错误
+        res.send({
+          data: '',
+          code: 0,
+          msg: rerr
+        })
+        return;
+      }
+      const doneData = doneDataStr ? JSON.parse(doneDataStr) : null;
+      res.send({
+        data: {
+          doingCount: doingData.length,
+          doneCount: doneData.length
+        },
+        code: 1,
+      });
+    })
+  })
 });
 
 module.exports = router;

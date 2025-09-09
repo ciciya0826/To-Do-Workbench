@@ -8,13 +8,14 @@ import { TASK_STATUS } from '@/const';
 
 interface iDrawer {
     task?: taskT
+    activeKey:number
     onClose: () => void
     open: boolean
-    onConfirm:(taskID:string,title:string,desc:string,startTime:Dayjs|null,endTime:Dayjs|null,status:0|1)=>void
+    onConfirm:(taskID:string,title:string,desc:string,startTime:Dayjs|null,endTime:Dayjs|null,status:number)=>void
 }
 
 export default function TaskDetail(props: iDrawer) {
-    const { task, onClose, open,onConfirm } = props
+    const { task,activeKey, onClose, open,onConfirm } = props
     const { TextArea } = Input;
     const [title, setTitle] = useState('');
     const [desc, setDesc] = useState('');
@@ -67,7 +68,7 @@ export default function TaskDetail(props: iDrawer) {
                     />
                 </Form.Item>
                 <Form.Item>
-                    <Button type="primary" htmlType="submit" block size='large' onClick={()=>onConfirm(task?.taskID||'',title,desc,task?.startTime||null,realDDL,0)}>确认</Button>
+                    <Button type="primary" htmlType="submit" block size='large' onClick={()=>onConfirm(task?.taskID||'',title,desc,task?.startTime||null,realDDL,activeKey)}>确认</Button>
                 </Form.Item>
             </Form>
         </Drawer>

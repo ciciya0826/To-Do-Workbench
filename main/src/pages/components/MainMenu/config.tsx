@@ -1,11 +1,10 @@
 import { DoingIcon, DoneIcon } from "@/assets/icons/MainIcon";
-import { icons } from "antd/es/image/PreviewGroup";
 
 const Config=[
     {
         name:'进行中',
         key:0,
-        count:1,
+        // countKey:'doingCount',
         icon:(<span className="my-icon">
             <DoingIcon/>
         </span>)
@@ -13,7 +12,7 @@ const Config=[
     {
         name:'已完成',
         key:1,
-        count:10,
+        // countKey:'doneCount',
         icon:(<span className="my-icon">
             <DoneIcon/>
         </span>)

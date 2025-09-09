@@ -11,4 +11,7 @@ export const apiConfig={
     update:{
         url:'/update',
     },
+    count:{
+        url:'/count',
+    },
 }
