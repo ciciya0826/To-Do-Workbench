@@ -3,15 +3,21 @@ import MainMenu from './components/MainMenu';
 import TaskList from './components/TaskList';
 import { useState } from 'react';
 import { tabKey } from '@/const';
+import TaskToolBar from './components/TaskList/components/TaskToolBar';
 
 export default function IndexPage() {
-  const [tab,setTab]=useState(tabKey.DOING);
-  const [isChange,setIsChange]=useState(false);
+  const [tab, setTab] = useState(tabKey.DOING);
+  const [isChange, setIsChange] = useState(false);
 
   return (
     <div className='page container'>
-      <MainMenu activeKey={tab} isChange={isChange} onClick={setTab}/>
-      <TaskList activeKey={tab} isChange={isChange} onClick={setIsChange}/>
+      <MainMenu activeKey={tab} isChange={isChange} onClick={setTab} />
+      <div className='right-page'>
+        <TaskToolBar />
+        {[tabKey.DOING,tabKey.DONE].includes(tab)&&
+        <TaskList activeKey={tab} isChange={isChange} onClick={setIsChange} />
+        }
+      </div>
     </div>
   );
 }

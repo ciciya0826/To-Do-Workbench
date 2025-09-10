@@ -1,4 +1,4 @@
-import { PlusIcon } from '@/assets/icons/PlusIcon';
+import { PlusIcon } from '@/assets/icons/Icons';
 import './index.less'
 import { Button, DatePicker, Input, Tag } from 'antd';
 import { useState } from 'react';

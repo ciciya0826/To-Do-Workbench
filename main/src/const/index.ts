@@ -6,4 +6,5 @@ export const TASK_STATUS={
 export const tabKey={
     DOING:0,
     DONE:1,
+    CALENDAR:10,
 }
