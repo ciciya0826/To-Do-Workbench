@@ -1,0 +1,78 @@
+.task-calendar {
+    flex: 1;
+    padding-left: 20px;
+    padding-right: 10px;
+    height: 80%;
+    overflow: auto;
+}
+
+.fc .fc-daygrid-day {
+    height: 120px !important;
+    /* 每个格子高度固定 */
+}
+
+/* 让头部固定 */
+.fc-header-toolbar fc-toolbar fc-toolbar-ltr {
+    flex: 0 0 auto;
+    position: sticky;
+    top: 0;
+    background: #ffffff;
+    /* 保证不透明 */
+    z-index: 100;
+}
+
+/* 让日历主体滚动 */
+.calendar-container .fc-view-harness {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    /* 开启垂直滚动 */
+}
+
+.task-display {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+    align-items: center;
+    position: relative; // tooltip 绝对定位的参考
+    white-space: nowrap;
+    overflow: hidden;
+    // text-overflow: hidden;
+    width: 100%;
+}
+
+.task-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-right: 4px;
+    flex-shrink: 0;
+}
+
+.dot-red {
+    background-color: red;
+}
+
+.dot-green {
+    background-color: green;
+}
+
+.task-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    flex-grow: 1;
+    z-index: 1;
+}
+
+.drag-ok {
+    background-color: #a2d0de;
+    padding-left: 8px;
+}
+
+.drag-none {
+    padding-left: 8px;
+    background-color: #dea2a2;
+    border-color: antiquewhite;
+}

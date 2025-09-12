@@ -35,7 +35,7 @@ export default function TaskCreator(props: iprops) {
             taskID: taskid,
             title: curTitle,
             desc: '',
-            startTime: DDL,
+            startTime: dayjs(),
             endTime: DDL,
             status: TASK_STATUS.DOING,
             finishTime:null,

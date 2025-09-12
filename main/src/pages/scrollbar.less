@@ -1,0 +1,51 @@
+/* 针对所有滚动条 */
+::-webkit-scrollbar {
+  width: 3px;  /* 垂直滚动条宽度 */
+  height: 3px; /* 水平滚动条高度 */
+}
+
+/* 滚动条轨道 */
+::-webkit-scrollbar-track {
+  background: #ffffff; /* 轨道背景色 */
+  border-radius: 4px;  /* 轨道圆角 */
+}
+
+/* 滚动条滑块 */
+::-webkit-scrollbar-thumb {
+  background: rgb(0, 0, 0); /* 滑块背景色 */
+  border-radius: 4px;  /* 滑块圆角 */
+}
+
+/* 滚动条滑块悬停状态 */
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8; /* 悬停时的滑块颜色 */
+}
+
+/* 滚动条滑块激活状态（点击时） */
+::-webkit-scrollbar-thumb:active {
+  background: #888888; /* 激活时的滑块颜色 */
+}
+
+// /* 为特定元素自定义滚动条 */
+// .custom-scrollbar {
+//   scrollbar-width: thin;          /* Firefox 支持：滚动条宽度 */
+//   scrollbar-color: #c1c1c1 #f1f1f1; /* Firefox 支持：滑块颜色 轨道颜色 */
+// }
+
+// .custom-scrollbar::-webkit-scrollbar {
+//   width: 6px;
+//   height: 6px;
+// }
+
+// .custom-scrollbar::-webkit-scrollbar-track {
+//   background: #f8f8f8;
+// }
+
+// .custom-scrollbar::-webkit-scrollbar-thumb {
+//   background: #d1d1d1;
+//   border-radius: 3px;
+// }
+
+// .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+//   background: #b1b1b1;
+// }
