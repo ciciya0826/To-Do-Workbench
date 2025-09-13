@@ -1,7 +1,15 @@
-import { CalendarIcon, DoingIcon, DoneIcon } from "@/assets/icons/Icons";
+import { CalendarIcon, ChartsIcon, DoingIcon, DoneIcon } from "@/assets/icons/Icons";
 
 
 const Config=[
+    {
+        name:'统计视图',
+        key:11,
+        icon:(<div className="my-icon" >
+            <ChartsIcon />
+        </div>
+        )
+    },
     {
         name:'日历视图',
         key:10,
