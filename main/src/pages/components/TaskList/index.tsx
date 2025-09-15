@@ -8,6 +8,7 @@ import { api, getApi, postApi } from '@/api';
 import { apiConfig } from '@/api/config';
 import { tabKey, TASK_STATUS } from '@/const';
 import TaskCreator from './components/TaskCreater';
+import TaskToolBar from './components/TaskToolBar';
 
 export type taskT = {
   taskID: string;
@@ -16,17 +17,17 @@ export type taskT = {
   startTime: Dayjs | null;
   endTime: Dayjs | null;
   status: number;
-  finishTime:Dayjs |null;
+  finishTime: Dayjs | null;
 }
 
 interface iprops {
   activeKey: number,
-  isChange:boolean,
+  isChange: boolean,
   onClick: (key: boolean) => void;
 }
 
 export default function TaskList(props: iprops) {
-  const { activeKey,isChange,onClick } = props;
+  const { activeKey, isChange, onClick } = props;
   const [messageApi, contextHolder] = message.useMessage();
   const [tasks, setTasks] = useState<taskT[]>([]);
   const [open, setOpen] = useState(false);
@@ -41,9 +42,14 @@ export default function TaskList(props: iprops) {
   const getLatestList = (activeKey: number) => {
     getApi(apiConfig.list.url, { tab: activeKey }).then(res => {
       if (res.code === 1) {
-        const latestTasks = res.data.map((i: taskT) => {
-          return Object.assign(i, { endTime: dayjs(i.endTime) })
-        })
+        const latestTasks = res.data.map((i: taskT) => (
+          {
+            ...i,
+            startTime: i.startTime ? dayjs(i.startTime) : null,
+            endTime: i.endTime ? dayjs(i.endTime) : null,
+            finishTime: i.finishTime ? dayjs(i.finishTime) : null
+          }
+        ))
         setTasks(latestTasks);
         onClick(!isChange);
       }
@@ -95,12 +101,12 @@ export default function TaskList(props: iprops) {
   }
 
   //完成任务 activeKey在哪种列表 status写入哪个文件
-  const handleFinish = (key: string, activeKey: number,finishTime:Dayjs|null) => {
+  const handleFinish = (key: string, activeKey: number, finishTime: Dayjs | null) => {
     postApi(apiConfig.update.url, {
       taskID: key,
       status: !activeKey,
       tab: activeKey,
-      finishTime:finishTime,
+      finishTime: finishTime,
     }).then(res => {
       if (res.code === 1) {
         getLatestList(activeKey);
@@ -116,7 +122,7 @@ export default function TaskList(props: iprops) {
   }
 
   //侧边栏中确认修改
-  const onConfirm = (taskID: string, title: string, desc: string, startTime: Dayjs | null, endTime: Dayjs | null, activeKey: number,finishTime:Dayjs |null) => {
+  const onConfirm = (taskID: string, title: string, desc: string, startTime: Dayjs | null, endTime: Dayjs | null, activeKey: number, finishTime: Dayjs | null) => {
     setOpen(false);
     postApi(apiConfig.update.url, {
       taskID: taskID,
@@ -125,8 +131,8 @@ export default function TaskList(props: iprops) {
       startTime: startTime,
       endTime: endTime,
       status: activeKey,
-      tab:activeKey,
-      finishTime:finishTime,
+      tab: activeKey,
+      finishTime: finishTime,
     }).then(res => {
       if (res.code === 1) {
         getLatestList(activeKey);
@@ -141,25 +147,44 @@ export default function TaskList(props: iprops) {
     })
   }
 
-  
+  //按任务开始时间排序
+  const sortByStartTime = (activeKey: number) => {
+    getApi(apiConfig.sort.url,{tab:activeKey,sort:'start'}).then(res=>{
+      if(res.code===1){
+        console.log('1');
+        getLatestList(activeKey);
+      }
+    })
+  }
+  //按任务截止时间排序
+  const sortByEndTime = (activeKey: number) => {
+    getApi(apiConfig.sort.url,{tab:activeKey,sort:'end'}).then(res=>{
+      if(res.code===1){
+        console.log('1');
+        getLatestList(activeKey);
+      }
+    })
+  }
+
 
   return (
     <>
       {contextHolder}
+      <TaskToolBar sortByStartTime={() => sortByStartTime(activeKey)} sortByEndTime={() => sortByEndTime(activeKey)} />
       <div className='task-container'>
-        {/* <h1 className='title'>//</h1> */}
         {activeKey === tabKey.DOING && <TaskCreator onCreate={handleCreate} />}
         <div className='task-list'>
-          {tasks.length===0&&<Empty description={activeKey===0?'暂无正在进行中的任务':'还没有完成过任务哦'}/>}
+          {tasks.length === 0 && <Empty description={activeKey === 0 ? '暂无正在进行中的任务' : '还没有完成过任务哦'} />}
           {tasks.map((task) => (
             <TaskItem
               key={task.taskID}
               title={task.title}
               desc={task.desc}
+              startTime={task.startTime}
               endTime={task.endTime ? task.endTime : null}
               onClick={() => OpenTask(task.taskID)}
               active={activeTaskKey === task.taskID}
-              onFinish={() => handleFinish(task.taskID, activeKey,dayjs())}
+              onFinish={() => handleFinish(task.taskID, activeKey, dayjs())}
               onDelete={() => handleDelete(task.taskID, activeKey)}
               activeKey={activeKey}
               finishTime={task.finishTime ? task.finishTime : null}

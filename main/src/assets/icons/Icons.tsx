@@ -35,3 +35,8 @@ export const ChartsIcon=()=>(
     fill="#3549e1ff"  p-id="7340"></path><path d="M891.392 698.0096a431.616 431.616 0 0 1-35.328 59.136 38.4 38.4 0 0 0 62.5664 44.6464c15.7184-22.1184 29.7984-45.6192 41.6768-69.8368a38.4 38.4 0 0 0-68.9152-33.9456z" 
     fill="#3549e1ff"  p-id="7341"></path></svg>
 )
+
+export const SortIcon=()=>(
+    <svg data-t="1757916543854" className="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5838" width="40" height="40"><path d="M428.6 924.2L96 619.5l67.8-74L328.2 696V110.3h100.4zM695.8 913.7H595.4V99.8L928 404.5l-67.8 74L695.8 328z" 
+    fill="#3549e1ff" p-id="5839"></path></svg>
+)

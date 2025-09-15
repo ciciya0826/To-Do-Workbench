@@ -29,6 +29,58 @@ router.get('/list', function (req, res, next) {
   });
 });
 
+//排序
+router.get('/sort', function (req, res, next) {
+  console.log('req',req.query)
+  const sortType = req.query.sort;  //排序方式
+  const type = req.query.tab;
+  const dbPath = path.join(__dirname, '..', 'db')
+  const dbFile = type === '0' ? `${dbPath}\\DOING.json` : `${dbPath}\\DONE.json`
+  fs.readFile(dbFile, 'utf8', (rerr, content) => {
+    if (rerr) { //读文件错误
+      res.send({
+        data: '',
+        code: 0,
+        msg: rerr
+      })
+      return;
+    }
+    console.log('sortType', sortType);
+    const data = JSON.parse(content);
+    console.log('before',data);
+    if (sortType === 'start') {
+      data.sort((a, b) => {
+        const sa = a.startTime
+        const sb = b.startTime
+        return new Date(sa).getTime() - new Date(sb).getTime();
+      });
+      console.log('after',data);
+    } else {
+      data.sort((a, b) => {
+        const sa = a.endTime?.valueOf() ?? 0
+        const sb = b.endTime?.valueOf() ?? 0
+        return new Date(sa).getTime() - new Date(sb).getTime();
+      });
+    }
+    const newContent=JSON.stringify(data);
+    fs.writeFile(dbFile, newContent, werr => {
+      if (werr) {
+        res.send({
+          data: '',
+          code: 0,
+          msg: werr
+        })
+        return;
+      }
+      res.send({
+        data: data,
+        code: 1,
+        msg: ''
+      });
+    });
+  });
+});
+
 //创建任务
 router.post('/create', function (req, res, next) {
   const dbFile = path.join(__dirname, '..', 'db', 'DOING.json')
@@ -88,12 +140,6 @@ router.post('/remove', function (req, res, next) {
     let newTasks;
     const data = dataStr ? JSON.parse(dataStr) : null;
     const removeTarget = data.find(i => i.taskID === taskID);
-    // console.log('req.query.tab:', type);
-    // console.log('taskID:', taskID);
-    // console.log('dbFile:', dbFile);
-    // console.log('dataStr',dataStr);
-    // console.log('data:', data);
-    // console.log('removeTarget', removeTarget);
     if (data.length === 0 || !removeTarget) {
       res.send({
         data: '',
@@ -127,7 +173,7 @@ router.post('/update', function (req, res, next) {
   const doneFile = path.join(__dirname, '..', 'db', 'DONE.json')
   const updateTask = req.body;
   const taskID = req.body?.taskID;
-  const finishTime=req.body.finishTime;
+  const finishTime = req.body.finishTime;
   const status = Number(req.body.status);
   const tab = req.body.tab;
   const readFile = tab === 0 ? doingFile : doneFile;  //要读的文件
@@ -197,7 +243,7 @@ router.post('/update', function (req, res, next) {
         const writeData = JSON.parse(writeDataStr);
         let newTask;
         newTask = readData.find(i => i.taskID === taskID);
-        newTask=Object.assign(newTask,updateTask);
+        newTask = Object.assign(newTask, updateTask);
         newReadTasks = JSON.stringify(readData.filter(i => i.taskID !== taskID));
         writeData.push(newTask);
         newWriteTasks = JSON.stringify(writeData);

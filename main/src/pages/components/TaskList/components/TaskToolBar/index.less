@@ -1,4 +1,5 @@
 .task-tool-bar{
+    width: 100%;
     background-color: rgb(220, 226, 253);
     height: 48px;
     border-radius: 10px;
@@ -7,14 +8,19 @@
     box-shadow: 5px 5px 10px #cfcfcf;
     display: flex;
 }
-.bar-icons{
+.task-sort{
+    width: auto;
     display: flex;
-    margin-right: 20px;
+    flex-direction: column;
+    margin-right: 35px;
     margin-left: auto;
     align-items: center;
-    gap:10px
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
 }
-.list-icon{
+
+.sort-icon{
     display: flex;
     width: 30px;
     transition: 0.2s;
@@ -23,12 +29,24 @@
         width: 40px;
     }
 }
-.calendar-icon{
-    display: flex;
-    width: 30px;
-    transition: 0.2s;
-    &:hover{
-        cursor: pointer;
-        width: 40px;
+
+.sort-div{
+    z-index: 1000;
+    width: 120px;
+    position: absolute;
+    top: 100%;
+    left: auto;
+    right: auto;
+    // transform:translateX(-50%);
+    background-color: white;
+    padding: 5px 0 5px 8px;
+    // padding: 5px 8px;
+    border-radius: 5%;
+    box-shadow: 5px 5px 15px 2px #b8b8b8;
+    &_startTime{
+        margin-bottom: 5px;
+    }
+    &_endTime{
+        margin-top: 5px;
     }
 }

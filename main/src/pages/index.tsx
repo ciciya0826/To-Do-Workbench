@@ -26,6 +26,7 @@ export default function IndexPage() {
     }
   )
   const [todayFinishCount, setTodayFinishCount] = useState(0);
+  const [todayRemainCount,setTodayRemainCount]=useState(0);
 
   const getCount = () => {
     api(apiConfig.count.url).then(res =>
@@ -33,7 +34,7 @@ export default function IndexPage() {
     )
   }
 
-  const getFinishCount = () => {
+  const getTodayCount = () => {
     getApi(apiConfig.list.url, { tab: tabKey.DONE }).then(res => {
       if (res.code === 1) {
         const todayStart=dayjs().startOf('day');
@@ -47,11 +48,24 @@ export default function IndexPage() {
       }
       else { }
     }).catch((e) => { console.log('Error:', e); });
+    getApi(apiConfig.list.url, { tab: tabKey.DOING }).then(res => {
+      if (res.code === 1) {
+        const todayEnd=dayjs().add(1, 'day').startOf('day');
+        const RemainTasks = res.data.filter((i: taskT) => 
+        {
+          const endTime=dayjs(i.endTime);
+          return endTime.isAfter(todayEnd);
+        }
+        );
+        setTodayRemainCount(RemainTasks.length);
+      }
+      else { }
+    }).catch((e) => { console.log('Error:', e); });
   }
 
   useEffect(() => {
     getCount();
-    getFinishCount();
+    getTodayCount();
   }, [isChange]);
 
 
@@ -59,12 +73,14 @@ export default function IndexPage() {
     <div className='page container'>
       <MainMenu activeKey={tab} onClick={setTab} count={count} />
       <div className='right-page'>
-        <TaskToolBar />
+        {/* {[tabKey.DOING, tabKey.DONE].includes(tab) &&
+          
+        } */}
         {[tabKey.DOING, tabKey.DONE].includes(tab) &&
           <TaskList activeKey={tab} isChange={isChange} onClick={setIsChange} />
         }
         {tab === tabKey.CALENDAR && <TaskCalendar />}
-        {tab === tabKey.CHARTS && <TaskStatistics count={count} todayFinishCount={todayFinishCount}/>}
+        {tab === tabKey.CHARTS && <TaskStatistics count={count} todayFinishCount={todayFinishCount} todayRemainCount={todayRemainCount}/>}
       </div>
     </div>
   );

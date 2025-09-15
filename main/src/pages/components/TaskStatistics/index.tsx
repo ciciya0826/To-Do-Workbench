@@ -3,10 +3,11 @@ import './index.less';
 import GridLayout from 'react-grid-layout';
 import '../../../../node_modules/react-grid-layout/css/styles.css';
 import '../../../../node_modules/react-resizable/css/styles.css'
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as echarts from 'echarts';
 import { Statistic, StatisticProps } from 'antd';
 import CountUp from 'react-countup';
+import { getLocalStorage, saveLocalStorage } from '@/utils';
 
 interface countItem {
   doingCount: number,
@@ -16,6 +17,7 @@ interface countItem {
 interface iprops {
   count: countItem;
   todayFinishCount: number;
+  todayRemainCount:number;
 }
 
 //获取Echarts中的数据
@@ -65,7 +67,15 @@ const formatter: StatisticProps['formatter'] = (value) => (
 );
 
 export default function TaskStatistics(props: iprops) {
-  const { count, todayFinishCount } = props;
+  const LAYOUT_KEY='lay-out';
+  const { count, todayFinishCount,todayRemainCount } = props;
+  const initialLayout = [
+    { i: "allFinishCount", x:6, y: 6, w: 3, h: 10 ,minW:1, minH:7},
+    { i: "todayFinishCount", x: 1, y: 0, w: 3, h: 10,minW:1, minH:7 },
+    { i: "todayRemainCount", x: 3, y: 2, w: 3, h: 10 ,minW:1, minH:7},
+    { i: "pie-charts", x: 0, y: 1, w: 3, h: 15 ,minW:2, minH:12 }
+  ];
+  const [layout,setLayout]=useState(getLocalStorage(LAYOUT_KEY,initialLayout));
   const chartRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (chartRef.current) {
@@ -114,7 +124,7 @@ export default function TaskStatistics(props: iprops) {
         color: 'linear-gradient(to top, #f77062 0%, #fe5196 100%)',
         content: () => {
           return (
-            <Statistic className="my-statistic"  title="今日剩余任务量" value={count.doingCount} formatter={formatter} />
+            <Statistic className="my-statistic"  title="今日剩余任务量" value={todayRemainCount} formatter={formatter} />
           );
         },
       },
@@ -142,22 +152,23 @@ export default function TaskStatistics(props: iprops) {
     )
   }
 
-  const layout = [
-    { i: "allFinishCount", x:6, y: 6, w: 2, h: 5 ,minW:1.5, minH:4},
-    { i: "todayFinishCount", x: 1, y: 0, w: 2, h: 4,minW:1.5, minH:4 },
-    { i: "todayRemainCount", x: 3, y: 2, w: 2, h: 5 ,minW:1.5, minH:4},
-    { i: "pie-charts", x: 0, y: 1, w: 3, h: 8 ,minW:2, minH:5 }
-  ];
+  const handleLayoutChange=(l:any)=>{
+    console.log(l);
+    saveLocalStorage(LAYOUT_KEY,l);
+    setLayout(l);
+  }
 
   return (
     <div className='task-charts'>
-
       <GridLayout
         className="layout"
         layout={layout}
-        cols={12}
-        rowHeight={30}
+        maxRows={Infinity}
+        compactType={null}
+        cols={20}
+        rowHeight={10}
         width={1200}
+        onLayoutChange={handleLayoutChange}
       >
         {renderCard()}
       </GridLayout>

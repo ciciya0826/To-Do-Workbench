@@ -14,4 +14,7 @@ export const apiConfig={
     count:{
         url:'/count',
     },
+    sort:{
+        url:'/sort',
+    }
 }
