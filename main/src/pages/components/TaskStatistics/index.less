@@ -1,8 +1,39 @@
-.task-calendar {
+.tabbar{
+    width: 100%;
+    height: 48px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.card-fliter{
+    margin-right: 35px;
+    margin-left: auto;
+    cursor: pointer;
+    width: 30px; 
+}
+
+.fliter-icon{
+    display: flex;
+    width: 30px;
+    transition: 0.2s;
+    &:hover{
+        cursor: pointer;
+        width: 40px;
+    }
+
+}
+
+.unVisible{
+display: none !important;
+}
+
+.task-charts {
+    // display: flex;
+    // flex-direction: column;
+    flex: 1; //自适应剩余空间
     padding-left: 20px;
     padding-right: 10px;
     height: 80%;
-    overflow: auto;
 }
 
 .allFinishCount {
@@ -12,6 +43,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+
     &:hover {
         box-shadow: 0 0 10px rgb(77, 71, 65);
     }
@@ -29,11 +61,13 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
+
         .ant-statistic-title {
             font-size: 16px;
             color: #363535;
             padding: 0;
             margin: 0;
+            font-weight: 600;
         }
 
         .ant-statistic-content {
@@ -46,13 +80,14 @@
     }
 }
 
-.todayFinishCount{
+.todayFinishCount {
     box-shadow: 5px 5px 8px rgb(172, 161, 146);
     border-radius: 5% 5% 0 5%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+
     &:hover {
         box-shadow: 0 0 10px rgb(77, 71, 65);
     }
@@ -70,11 +105,13 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
+
         .ant-statistic-title {
             font-size: 16px;
             color: #363535;
             padding: 0;
             margin: 0;
+            font-weight: 600;
         }
 
         .ant-statistic-content {
@@ -87,13 +124,14 @@
     }
 }
 
-.todayRemainCount{
+.todayRemainCount {
     box-shadow: 5px 5px 8px rgb(172, 161, 146);
     border-radius: 5% 5% 0 5%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+
     &:hover {
         box-shadow: 0 0 10px rgb(77, 71, 65);
     }
@@ -111,9 +149,55 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
+
         .ant-statistic-title {
             font-size: 16px;
             color: #363535;
+            padding: 0;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .ant-statistic-content {
+            font-size: 50px;
+            font-weight: bold;
+            color: lemonchiffon;
+            padding: 0;
+            margin: 0;
+        }
+    }
+}
+
+.allRemainCount {
+    box-shadow: 5px 5px 8px rgb(172, 161, 146);
+    border-radius: 5% 5% 0 5%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+        box-shadow: 0 0 10px rgb(77, 71, 65);
+    }
+
+    .card-title {
+        color: dodgerblue;
+        font-weight: 700;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        font-size: 20px;
+    }
+
+    .my-statistic {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        .ant-statistic-title {
+            font-size: 16px;
+            color: #363535;
+            font-weight: 600;
             padding: 0;
             margin: 0;
         }
@@ -121,7 +205,7 @@
         .ant-statistic-content {
             font-size: 50px;
             font-weight: bold;
-            color: lemonchiffon;
+            color: darkturquoise;
             padding: 0;
             margin: 0;
         }
@@ -151,6 +235,34 @@
         color: peru;
         font-weight: 700;
         margin-top: 5px;
+        font-size: 20px;
+    }
+}
+
+.gauge-charts {
+    // background-image: linear-gradient(to top, #fddb92 0%, #d1fdff 100%);
+    border-radius: 5% 5% 0 5%;
+    padding: 3px 10px 3px 10px;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 5px 5px 8px rgb(172, 161, 146);
+
+    &:hover {
+        box-shadow: 0 0 10px rgb(77, 71, 65);
+    }
+
+    &_item {
+        flex: 1;
+        padding: 0;
+    }
+
+    &_text {
+        color: white;
+        font-weight: 700;
+        margin-top: 5px;
+        margin-bottom: 10px;
         font-size: 20px;
     }
 }
