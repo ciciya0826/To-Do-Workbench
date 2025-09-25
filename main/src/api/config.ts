@@ -16,5 +16,8 @@ export const apiConfig={
     },
     sort:{
         url:'/sort',
-    }
+    },
+    search:{
+        url:'/search',
+    },
 }

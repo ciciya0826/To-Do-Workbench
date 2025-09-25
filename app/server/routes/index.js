@@ -31,7 +31,7 @@ router.get('/list', function (req, res, next) {
 
 //排序
 router.get('/sort', function (req, res, next) {
-  console.log('req',req.query)
+  // console.log('req',req.query)
   const sortType = req.query.sort;  //排序方式
   const type = req.query.tab;
   const dbPath = path.join(__dirname, '..', 'db')
@@ -45,16 +45,16 @@ router.get('/sort', function (req, res, next) {
       })
       return;
     }
-    console.log('sortType', sortType);
+    // console.log('sortType', sortType);
     const data = JSON.parse(content);
-    console.log('before',data);
+    // console.log('before',data);
     if (sortType === 'start') {
       data.sort((a, b) => {
         const sa = a.startTime
         const sb = b.startTime
         return new Date(sa).getTime() - new Date(sb).getTime();
       });
-      console.log('after',data);
+      // console.log('after',data);
     } else {
       data.sort((a, b) => {
         const sa = a.endTime?.valueOf() ?? 0
@@ -312,6 +312,29 @@ router.get('/count', function (req, res, next) {
       });
     })
   })
+});
+
+//搜索
+router.get('/search', function (req, res, next) {
+  const type = req.query.tab;
+  const taskIDArray=req.query.searchID;
+  const dbPath = path.join(__dirname, '..', 'db')
+  const dbFile = type === '0' ? `${dbPath}\\DOING.json` : `${dbPath}\\DONE.json`
+  fs.readFile(dbFile, 'utf8', (rerr, content) => {
+    if (rerr) { //读文件错误
+      res.send({
+        data: '',
+        code: 0,
+        msg: rerr
+      })
+      return;
+    }
+    const data=JSON.parse(content).filter(i=>taskIDArray.includes(i.taskID));
+    res.send({
+      data: data,
+      code: 1,
+    });
+  });
 });
 
 module.exports = router;

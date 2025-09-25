@@ -31,11 +31,16 @@ export default function TaskList(props: iprops) {
   const [messageApi, contextHolder] = message.useMessage();
   const [tasks, setTasks] = useState<taskT[]>([]);
   const [open, setOpen] = useState(false);
+  const [sortManner, setSortManner] = useState<string>('');
   const [activeTaskKey, setActiveTaskKey] = useState('');  //当前被激活的taskID
+  const [searchTasks, setSearchTasks] = useState<string[]>([]);
 
   useEffect(() => {
-    getLatestList(activeKey);
-    // onClick(!isChange);
+    if (sortManner === 'endTime') {
+      sortByEndTime(activeKey);
+    } else {
+      sortByStartTime(activeKey);
+    }
   }, [activeKey]);
 
   //获取最新列表
@@ -74,7 +79,7 @@ export default function TaskList(props: iprops) {
         content: '创建成功',
         duration: 0.9,
       })
-      console.log(data);
+      // console.log(data);
     })
   }
 
@@ -133,9 +138,14 @@ export default function TaskList(props: iprops) {
       status: activeKey,
       tab: activeKey,
       finishTime: finishTime,
+      sortManner: sortManner,
     }).then(res => {
       if (res.code === 1) {
-        getLatestList(activeKey);
+        if (sortManner === 'endTime') {
+          sortByEndTime(activeKey);
+        } else {
+          sortByStartTime(activeKey);
+        }
         messageApi.open({
           type: 'success',
           content: '任务完成',
@@ -149,28 +159,68 @@ export default function TaskList(props: iprops) {
 
   //按任务开始时间排序
   const sortByStartTime = (activeKey: number) => {
-    getApi(apiConfig.sort.url,{tab:activeKey,sort:'start'}).then(res=>{
-      if(res.code===1){
-        console.log('1');
+    getApi(apiConfig.sort.url, { tab: activeKey, sort: 'start' }).then(res => {
+      if (res.code === 1) {
+        setSortManner('startTime');
         getLatestList(activeKey);
       }
     })
   }
   //按任务截止时间排序
   const sortByEndTime = (activeKey: number) => {
-    getApi(apiConfig.sort.url,{tab:activeKey,sort:'end'}).then(res=>{
-      if(res.code===1){
-        console.log('1');
+    getApi(apiConfig.sort.url, { tab: activeKey, sort: 'end' }).then(res => {
+      if (res.code === 1) {
+        setSortManner('endTime');
         getLatestList(activeKey);
       }
     })
   }
 
+  //搜索
+  const handleSearch = (activeKey: number, searchTasks: string[]) => {
+    getApi(apiConfig.search.url, { tab: activeKey, searchID: searchTasks }).then(res => {
+      if (res.code === 1) {
+        const latestTasks = res.data.map((i: taskT) => (
+          {
+            ...i,
+            startTime: i.startTime ? dayjs(i.startTime) : null,
+            endTime: i.endTime ? dayjs(i.endTime) : null,
+            finishTime: i.finishTime ? dayjs(i.finishTime) : null
+          }
+        ))
+        setTasks(latestTasks);
+      } else { }
+    }).catch((e) => { console.log('Error:', e); });
+  }
+  // const updataSearchTasks = (ids: string[]) => {
+  //   setSearchTasks(prev => {
+  //     return JSON.stringify(prev) === JSON.stringify(ids) ? prev : ids
+  //   })
+  // }
+
+  useEffect(() => {
+    console.log('shuaxin',searchTasks)
+    handleSearch(activeKey, searchTasks)
+  }, [activeKey, searchTasks]);
+
+  const handleValueClear = (sortManner: string) => {
+    if (sortManner === 'endTime') {
+      sortByEndTime(activeKey);
+    } else {
+      sortByStartTime(activeKey);
+    }
+  }
 
   return (
     <>
       {contextHolder}
-      <TaskToolBar sortByStartTime={() => sortByStartTime(activeKey)} sortByEndTime={() => sortByEndTime(activeKey)} />
+      <TaskToolBar
+        tasks={tasks}
+        sortByStartTime={() => sortByStartTime(activeKey)}
+        sortByEndTime={() => sortByEndTime(activeKey)}
+        onSearchChange={setSearchTasks}
+        handleValueClear={() => handleValueClear(sortManner)}
+      />
       <div className='task-container'>
         {activeKey === tabKey.DOING && <TaskCreator onCreate={handleCreate} />}
         <div className='task-list'>
