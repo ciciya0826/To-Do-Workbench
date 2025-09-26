@@ -66,6 +66,7 @@ export default function TaskToolBar(props: iprops) {
             <div className='task-tool-bar_items'>
                 <div className='task-search'>
                     <AutoComplete
+                        className='task-search-input'
                         value={value}
                         options={options}
                         style={{ width: 220 }}
