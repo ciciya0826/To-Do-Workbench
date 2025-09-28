@@ -2,12 +2,9 @@
     width: 100%;
     height: 50px;
     padding-left: 15px;
-    // padding: 6px 10px;
     border: 0;
+    border-radius: var(--radius);
     background: white;
-    box-shadow: 0 0 1px 1px rgb(200, 208, 245);
-    ;
-    border-radius: 5px;
     cursor: pointer;
     transition: all 0.2s;
     text-align: left;
@@ -17,32 +14,28 @@
 
     &-active {
         transition: 0.3s;
-        margin-left: 20px;
-        background-color: rgb(101, 129, 251);
+        background-image: linear-gradient(to right, var(--active) 0%, var(--color) 100%);
         color: rgb(255, 255, 255);
-        border-radius: 30px 0 0 30px;
+        border-radius: var(--radius);
         position: relative;
-
-        //右下角三角形
-        &::after {
-            content: ''; /* 伪元素必须设置的空内容 */
-            position: absolute; 
-            bottom: -8px; /* 与容器顶部对齐 */
-            right: 0px; /* 与容器左侧对齐 */
-            width: 0;
-            height: 0;
-            border-style: solid;
-            border-width: 8px 8px 0 0; /*三角形大小*/
-            border-color: rgb(101, 129, 251) transparent transparent transparent; /* 三角形颜色 */
-        }
 
         .menu-item_name {
             font-weight: bolder;
         }
+        .my-icon{
+            --color:white;
+        }
+    }
+
+    .my-icon {
+        display: flex;
+        margin-right: 10px;
+        width: 30px;
+        height: auto;
     }
 
     &:hover {
-        box-shadow: 0 0 2px 2px rgb(210, 211, 211);
+        background-color: #eae9e9;
     }
 
     &_name {
@@ -54,22 +47,16 @@
         position: absolute;
         border-radius: 50%;
         right: 10px;
-        background-color: red;
+        background-color: white;
         width: 25px;
         height: 25px;
         text-align: center;
         display: inline-block;
         line-height: 25px;
-        color: white;
+        color: var(--color);
         top: 50%;
         transform: translateY(-50%);
+        font-size: 15px;
         font-weight: bolder;
     }
-}
-
-.my-icon {
-    display: flex;
-    margin-right: 5px;
-    width: 30px;
-    height: auto;
 }

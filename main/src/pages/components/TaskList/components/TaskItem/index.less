@@ -1,11 +1,10 @@
 .task-item {
     height: 115px;
     padding: 6px 0px;
-    // display: flex;
-    // flex-direction: column;
+    background-color: white;
     position: relative;
     align-items: flex-start;
-    border-radius: 8px;
+    border-radius: var(--radius);
     cursor: pointer;
     margin: 2px 5px 20px 5px;
     box-shadow: 5px 5px 10px #cfcfcf;
@@ -14,16 +13,13 @@
     &:hover {
         box-shadow: 5px 5px 15px 2px #b8b8b8;
     }
-
-    // &_desc {
-    //     color: #4b4b4b
-    // }
 }
 
 .task-item_info {
     position: absolute;
     left: 10px;
     padding-left: 10px;
+    padding-top: 10px;
     left: 10px;
     right: 10px;
     width: 900px;
@@ -31,6 +27,8 @@
 
     &:hover {
         background-color: rgb(245, 246, 248);
+        border-radius: var(--radius);
+        height: 50%;
     }
 }
 
@@ -51,34 +49,44 @@
 
     &_finish-btn {
         display: flex;
-        text-align: center;
         justify-content: center;
-        background-color: rgb(20, 102, 255);
+        background-color: var(--color);
         border: 0;
         height: 30px;
+        line-height: 30px;
         width: 150px;
         font-size: 17px;
+        font-weight: 700;
         color: white;
-        border-radius: 5%;
+        border-radius: var(--radius);
         cursor: pointer;
         align-self: flex-start;
+        transition: 0.2s;
+        &:hover{
+            background-color: var(--active);
+        }
     }
 
     &_delete-btn {
         display: flex;
-        text-align: center;
         justify-content: center;
-        background-color: rgb(177, 217, 245);
+        background-color: rgb(218, 236, 249);
         border: 0;
         height: 30px;
+        line-height: 30px;
         width: 150px;
         font-size: 17px;
-        color: rgb(47, 96, 228);
-        border-radius: 5%;
+        font-weight: 700;
+        color: rgb(71, 119, 250);
+        border-radius: var(--radius);
         margin-bottom: 10px;
         margin-top: 10px;
         cursor: pointer;
         align-self: flex-start;
+        transition: 0.2s;
+        &:hover{
+            background-color: var(--active);
+        }
     }
 }
 
@@ -187,7 +195,7 @@
         padding-bottom: 4px;
         width: auto;
         height: 22px;
-        align-self: flex-start;
+        // align-self: flex-start;
         font-size: 15px;
         text-align: center;
         justify-content: center;

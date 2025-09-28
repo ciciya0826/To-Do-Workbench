@@ -1,29 +1,30 @@
-.tabbar{
+.tabbar {
     width: 100%;
     height: 48px;
     margin-top: 20px;
     margin-bottom: 20px;
 }
 
-.card-fliter{
+.card-fliter {
     margin-right: 35px;
     margin-left: auto;
     cursor: pointer;
-    width: 30px; 
+    width: 30px;
 }
 
-.fliter-icon{
+.fliter-icon {
     display: flex;
     width: 30px;
     transition: 0.2s;
-    &:hover{
+
+    &:hover {
         cursor: pointer;
-        transform: scale(1.3);   // 视觉放大
+        transform: scale(1.3); // 视觉放大
     }
 }
 
-.unVisible{
-display: none !important;
+.unVisible {
+    display: none !important;
 }
 
 .task-charts {
@@ -37,7 +38,7 @@ display: none !important;
 
 .allFinishCount {
     box-shadow: 5px 5px 8px rgb(172, 161, 146);
-    border-radius: 5% 5% 0 5%;
+    border-radius: var(--radius) var(--radius) 0 var(--radius);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -47,14 +48,6 @@ display: none !important;
         box-shadow: 0 0 10px rgb(77, 71, 65);
     }
 
-    .card-title {
-        color: chocolate;
-        font-weight: 700;
-        margin-top: 5px;
-        margin-bottom: 5px;
-        font-size: 20px;
-    }
-
     .my-statistic {
         display: flex;
         flex-direction: column;
@@ -62,11 +55,13 @@ display: none !important;
         justify-content: center;
 
         .ant-statistic-title {
-            font-size: 16px;
-            color: #363535;
             padding: 0;
             margin: 0;
-            font-weight: 600;
+            color: chocolate;
+            font-weight: 700;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            font-size: 20px;
         }
 
         .ant-statistic-content {
@@ -81,7 +76,7 @@ display: none !important;
 
 .todayFinishCount {
     box-shadow: 5px 5px 8px rgb(172, 161, 146);
-    border-radius: 5% 5% 0 5%;
+    border-radius: var(--radius) var(--radius) 0 var(--radius);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -91,14 +86,6 @@ display: none !important;
         box-shadow: 0 0 10px rgb(77, 71, 65);
     }
 
-    .card-title {
-        color: chocolate;
-        font-weight: 700;
-        margin-top: 5px;
-        margin-bottom: 5px;
-        font-size: 20px;
-    }
-
     .my-statistic {
         display: flex;
         flex-direction: column;
@@ -106,11 +93,13 @@ display: none !important;
         justify-content: center;
 
         .ant-statistic-title {
-            font-size: 16px;
-            color: #363535;
             padding: 0;
             margin: 0;
-            font-weight: 600;
+            color: chocolate;
+            font-weight: 700;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            font-size: 20px;
         }
 
         .ant-statistic-content {
@@ -125,7 +114,7 @@ display: none !important;
 
 .todayRemainCount {
     box-shadow: 5px 5px 8px rgb(172, 161, 146);
-    border-radius: 5% 5% 0 5%;
+    border-radius: var(--radius) var(--radius) 0 var(--radius);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -135,14 +124,6 @@ display: none !important;
         box-shadow: 0 0 10px rgb(77, 71, 65);
     }
 
-    .card-title {
-        color: papayawhip;
-        font-weight: 700;
-        margin-top: 5px;
-        margin-bottom: 5px;
-        font-size: 20px;
-    }
-
     .my-statistic {
         display: flex;
         flex-direction: column;
@@ -150,11 +131,13 @@ display: none !important;
         justify-content: center;
 
         .ant-statistic-title {
-            font-size: 16px;
-            color: #363535;
             padding: 0;
             margin: 0;
-            font-weight: 600;
+            color: papayawhip;
+            font-weight: 700;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            font-size: 20px;
         }
 
         .ant-statistic-content {
@@ -169,7 +152,7 @@ display: none !important;
 
 .allRemainCount {
     box-shadow: 5px 5px 8px rgb(172, 161, 146);
-    border-radius: 5% 5% 0 5%;
+    border-radius: var(--radius) var(--radius) 0 var(--radius);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -179,14 +162,6 @@ display: none !important;
         box-shadow: 0 0 10px rgb(77, 71, 65);
     }
 
-    .card-title {
-        color: dodgerblue;
-        font-weight: 700;
-        margin-top: 5px;
-        margin-bottom: 5px;
-        font-size: 20px;
-    }
-
     .my-statistic {
         display: flex;
         flex-direction: column;
@@ -194,11 +169,13 @@ display: none !important;
         justify-content: center;
 
         .ant-statistic-title {
-            font-size: 16px;
-            color: #363535;
-            font-weight: 600;
             padding: 0;
             margin: 0;
+            color: dodgerblue;
+            font-weight: 700;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            font-size: 20px;
         }
 
         .ant-statistic-content {
@@ -214,7 +191,7 @@ display: none !important;
 .pie-charts {
     padding: 10px;
     // background-image: linear-gradient(to top, #fddb92 0%, #d1fdff 100%);
-    border-radius: 5% 5% 0 5%;
+    border-radius: var(--radius) var(--radius) 0 var(--radius);
     align-items: center;
     justify-content: center;
     display: flex;
@@ -240,7 +217,7 @@ display: none !important;
 
 .gauge-charts {
     // background-image: linear-gradient(to top, #fddb92 0%, #d1fdff 100%);
-    border-radius: 5% 5% 0 5%;
+    border-radius: var(--radius) var(--radius) 0 var(--radius);
     padding: 3px 10px 3px 10px;
     align-items: center;
     justify-content: center;

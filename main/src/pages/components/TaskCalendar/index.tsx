@@ -113,32 +113,34 @@ export default function TaskCalendar() {
                 headerToolbar={{
                     left: "",
                     center: "title",
-                    right: "today prev,next",
+                    right:"today prev,next",
                 }}
                 events={
                     tasks
-                        ? tasks.map((task) => {
-                              const actualEndTime = task.finishTime ? task.finishTime : task.endTime;
-                              // ✅ 同一天才是短任务
-                              const isShort = dayjs(task.startTime).isSame(actualEndTime, 'day');
+                        ? tasks.map(task => {
+                            const actualEndTime = task.finishTime ?? task.endTime ?? null;
+                            const event: any = {
+                                id: task.taskID,
+                                title: task.title,
+                                extendedProps: {
+                                    desc: task.desc,
+                                    status: task.status,
+                                    finishTime: task.finishTime
+                                        ? dayjs(task.finishTime).toDate()
+                                        : new Date(),
+                                },
+                                className: dayjs(task.startTime).isSame(actualEndTime, 'day')
+                                    ? 'normal'
+                                    : `drag${task.finishTime === null ? '-none' : '-ok'}`,
+                            };
+                            if (task.startTime) event.start = task.startTime;      // 直接字符串
+                            if (actualEndTime) event.end = actualEndTime;       // 字符串
 
-                              return {
-                                  id: task.taskID,
-                                  title: task.title,
-                                  start: task.startTime,
-                                  end: actualEndTime,
-                                  extendedProps: {
-                                      desc: task.desc,
-                                      status: task.status,
-                                      finishTime: task.finishTime ? dayjs(task.finishTime).toDate() : '',
-                                  },
-                                  className: isShort
-                                      ? 'normal'
-                                      : `drag${task.finishTime === null ? '-none' : '-ok'}`,
-                              };
-                          })
+                            return event;
+                        })
                         : []
                 }
+
                 eventContent={(arg) => eventContent(arg)}
                 editable={false}
                 selectable={true}

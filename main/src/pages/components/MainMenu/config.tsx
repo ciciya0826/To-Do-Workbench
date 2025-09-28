@@ -1,4 +1,4 @@
-import { CalendarIcon, ChartsIcon, DoingIcon, DoneIcon } from "@/assets/icons/Icons";
+import { CalendarIcon, ChartsIcon, DoingIcon, DoneIcon, SettingsIcon } from "@/assets/icons/Icons";
 
 
 const Config=[
@@ -33,7 +33,15 @@ const Config=[
         icon:(<div className="my-icon">
             <DoneIcon/>
         </div>)
-    }
+    },
+    {
+        name:'设置',
+        key:12,
+        // countKey:'doneCount',
+        icon:(<div className="my-icon">
+            <SettingsIcon/>
+        </div>)
+    },
 ]
 
 export default Config;

@@ -176,7 +176,7 @@ export default function TaskStatistics(props: iprops) {
     { i: "todayRemainCount", title: "今日剩余任务量" },
     { i: "pie-charts", title: "任务完成比" },
     { i: "allRemainCount", title: "总剩余任务量" },
-    { i: "gauge-charts", title: "任务完成进度" }
+    { i: "gauge-charts", title: "任务完成进度" },
   ]
   const [layout, setLayout] = useState(getLocalStorage(LAYOUT_KEY, initialLayout));
   const [visibleCard, setVisibleCard] = useState<string[]>(getLocalStorage(VISIBLE_CARD, visibleCards.map(card => card.i)));
@@ -226,8 +226,6 @@ export default function TaskStatistics(props: iprops) {
   const renderCard = () => {
     const cardConfig = [
       {
-        // isShow:showAllFinish,
-        title: '任务完成量',
         color: 'linear-gradient(to right, #92fe9d 0%, #00c9ff 100%)',
         className: 'allFinishCount',
         content: () => {
@@ -237,8 +235,6 @@ export default function TaskStatistics(props: iprops) {
         },
       },
       {
-        // isShow:showTodayFinish,
-        title: '任务完成量',
         color: 'linear-gradient(-20deg, #e9defa 0%, #fbfcdb 100%)',
         className: 'todayFinishCount',
         content: () => {
@@ -248,8 +244,6 @@ export default function TaskStatistics(props: iprops) {
         },
       },
       {
-        // isShow:showTodayRemain,
-        title: '任务完成量',
         className: 'todayRemainCount',
         color: 'linear-gradient(to top, #f77062 0%, #fe5196 100%)',
         content: () => {
@@ -259,8 +253,6 @@ export default function TaskStatistics(props: iprops) {
         },
       },
       {
-        // isShow:showPie,
-        title: '',
         className: 'pie-charts',
         color: 'linear-gradient(to top, #fddb92 0%, #d1fdff 100%)',
         content: () => {
@@ -273,8 +265,6 @@ export default function TaskStatistics(props: iprops) {
         },
       },
       {
-        // isShow:showAllRemain,
-        title: '任务完成量',
         color: 'linear-gradient(120deg, #f6d365 0%, #fda085 100%)',
         className: 'allRemainCount',
         content: () => {
@@ -284,8 +274,6 @@ export default function TaskStatistics(props: iprops) {
         },
       },
       {
-        // isShow:showGauge,
-        title: '',
         className: 'gauge-charts',
         color: 'linear-gradient(to right, #fa709a 0%, #fee140 100%)',
         content: () => {
@@ -300,9 +288,9 @@ export default function TaskStatistics(props: iprops) {
     ];
     return cardConfig.map(i =>
     (
-      
-      <div key={i.className} className={`${i.className} ${visibleCard.includes(i.className)? "":'unVisible'}`} style={{ backgroundImage: i.color }}>
-        <div className='card-title'>{i.title}</div>
+
+      <div key={i.className} className={`${i.className} ${visibleCard.includes(i.className) ? "" : 'unVisible'}`} style={{ backgroundImage: i.color }}>
+        {/* <div className='card-title'>{i.title}</div> */}
         {i.content()}
       </div>
     )
@@ -327,9 +315,9 @@ export default function TaskStatistics(props: iprops) {
     }
   };
 
-  useEffect(()=>{
-    console.log("visibleCard",visibleCard);
-  },[visibleCard])
+  useEffect(() => {
+    console.log("visibleCard", visibleCard);
+  }, [visibleCard])
 
   const handleCheckBoxFocused = (cardId: string) => {
     const item = localStorage.getItem(VISIBLE_CARD);
@@ -351,7 +339,7 @@ export default function TaskStatistics(props: iprops) {
   const items =
     visibleCards.map(i => (
       {
-        label: (<Checkbox checked={getLocalStorage(VISIBLE_CARD,null).includes(i.i)} onChange={e => {
+        label: (<Checkbox checked={getLocalStorage(VISIBLE_CARD, null).includes(i.i)} onChange={e => {
           if (e.target.checked) {
             handleCheckBoxFocused(i.i);
           } else {
@@ -391,11 +379,12 @@ export default function TaskStatistics(props: iprops) {
           layout={layout}
           allowOverlap={true}       // 允许卡片重叠
           compactType={null}
-          cols={20}
+          cols={50}
           rowHeight={5} //每行多少px
           maxRows={40}  //最多的行数
           width={1160}
           onLayoutChange={handleLayoutChange}
+          preventCollision={true}
         >
           {renderCard()}
         </GridLayout>

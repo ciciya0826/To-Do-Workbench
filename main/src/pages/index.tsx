@@ -8,6 +8,8 @@ import { api, getApi } from '@/api';
 import { apiConfig } from '@/api/config';
 import TaskStatistics from './components/TaskStatistics';
 import dayjs from 'dayjs';
+import { getLocalStorage } from '@/utils';
+import Settings, { DEFAULT_SETTINGS_VALUE, SETTINGS_KEY } from './components/Settings';
 
 //任务数量
 interface countItem {
@@ -26,6 +28,15 @@ export default function IndexPage() {
   )
   const [todayFinishCount, setTodayFinishCount] = useState(0);
   const [todayRemainCount,setTodayRemainCount]=useState(0);
+
+  useEffect(()=>{
+    const settingsValue=getLocalStorage(SETTINGS_KEY,DEFAULT_SETTINGS_VALUE);
+    var root = document.documentElement;
+    root.style.setProperty('--color', settingsValue.mainColor);
+    root.style.setProperty('--active', settingsValue.colorActive);
+    root.style.setProperty('--radius', `${settingsValue.borderRadius}px`);
+    console.log(`${settingsValue.borderRadius}px`)
+  },[])
 
   const getCount = () => {
     api(apiConfig.count.url).then(res =>
@@ -53,7 +64,7 @@ export default function IndexPage() {
         const RemainTasks = res.data.filter((i: taskT) => 
         {
           const endTime=dayjs(i.endTime);
-          return endTime.isAfter(todayEnd);
+          return !endTime.isAfter(todayEnd);
         }
         );
         setTodayRemainCount(RemainTasks.length);
@@ -72,14 +83,12 @@ export default function IndexPage() {
     <div className='page container'>
       <MainMenu activeKey={tab} onClick={setTab} count={count} />
       <div className='right-page'>
-        {/* {[tabKey.DOING, tabKey.DONE].includes(tab) &&
-          
-        } */}
         {[tabKey.DOING, tabKey.DONE].includes(tab) &&
           <TaskList activeKey={tab} isChange={isChange} onClick={setIsChange} />
         }
         {tab === tabKey.CALENDAR && <TaskCalendar />}
         {tab === tabKey.CHARTS && <TaskStatistics count={count} todayFinishCount={todayFinishCount} todayRemainCount={todayRemainCount}/>}
+        {tab===tabKey.SETTINGS &&<Settings />}
       </div>
     </div>
   );

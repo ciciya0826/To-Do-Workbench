@@ -8,4 +8,5 @@ export const tabKey={
     DONE:1,
     CALENDAR:10,
     CHARTS:11,
+    SETTINGS:12,
 }
