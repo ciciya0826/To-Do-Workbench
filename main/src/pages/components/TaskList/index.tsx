@@ -8,7 +8,7 @@ import { api, getApi, postApi } from '@/api';
 import { apiConfig } from '@/api/config';
 import { tabKey, TASK_STATUS } from '@/const';
 import TaskCreator from './components/TaskCreater';
-import TaskToolBar from './components/TaskToolBar';
+import TaskToolBar, { leftTarget } from './components/TaskToolBar';
 
 export type taskT = {
   taskID: string;
@@ -33,7 +33,8 @@ export default function TaskList(props: iprops) {
   const [open, setOpen] = useState(false);
   const [sortManner, setSortManner] = useState<string>('');
   const [activeTaskKey, setActiveTaskKey] = useState('');  //当前被激活的taskID
-  const [searchTasks, setSearchTasks] = useState<string[]>([]);
+  const [searchTasks, setSearchTasks] = useState<string[]>([]);//搜索
+  const [showManner,setShowManner]=useState(leftTarget.ALL_TASK);
 
   useEffect(() => {
     if (sortManner === 'endTime') {
@@ -192,11 +193,6 @@ export default function TaskList(props: iprops) {
       } else { }
     }).catch((e) => { console.log('Error:', e); });
   }
-  // const updataSearchTasks = (ids: string[]) => {
-  //   setSearchTasks(prev => {
-  //     return JSON.stringify(prev) === JSON.stringify(ids) ? prev : ids
-  //   })
-  // }
 
   useEffect(() => {
     // console.log('shuaxin',searchTasks)
@@ -220,13 +216,21 @@ export default function TaskList(props: iprops) {
         sortByEndTime={() => sortByEndTime(activeKey)}
         onSearchChange={setSearchTasks}
         handleValueClear={() => handleValueClear(sortManner)}
+        showTodayTask={()=>{setShowManner(leftTarget.TODAY_TASK)}}
+        showTodayOver={()=>setShowManner(leftTarget.TODAY_OVER)}
+        showHavenOver={()=>setShowManner(leftTarget.HAVEN_OVER)}
+        activeKey={activeKey}
       />
       <div className='task-container'>
         {activeKey === tabKey.DOING && <TaskCreator onCreate={handleCreate} />}
         <div className='task-list'>
           {tasks.length === 0 && <Empty description={activeKey === 0 ? '暂无正在进行中的任务' : '还没有完成过任务哦'} />}
           {tasks.map((task) => (
-            <TaskItem
+            (showManner===leftTarget.ALL_TASK
+            ||(showManner===leftTarget.TODAY_TASK&&dayjs(task.endTime).isAfter(dayjs()))
+            ||(showManner===leftTarget.TODAY_OVER&&dayjs(task.endTime).isBefore(dayjs().add(1,'day').startOf('day')))
+            ||(showManner===leftTarget.HAVEN_OVER&&dayjs(task.endTime).isBefore(dayjs())))
+            &&<TaskItem
               key={task.taskID}
               title={task.title}
               desc={task.desc}

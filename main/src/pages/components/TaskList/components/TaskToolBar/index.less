@@ -7,8 +7,15 @@
     margin-bottom: 20px;
     // box-shadow: 5px 5px 10px #cfcfcf;
     display: flex;
+    align-items: center;
 
-    &_items {
+    &_left {
+        display: flex;
+        height: auto;
+        margin-left: 30px;
+    }
+
+    &_right {
         width: auto;
         display: flex;
         margin-right: 35px;
@@ -18,14 +25,32 @@
     }
 }
 
+.task-tool-bar_left>div {
+    padding: 5px 8px;
+    background-color: white;
+    border: 1px solid #cbcbcb;
+    cursor: pointer;
+    transition: 0.2s;
+    &:hover{
+        background-color: var(--active);
+    }
+}
+.task-tool-bar_left>div.active{
+    background-color: var(--color);
+    color: white;
+    font-weight: 600;
+}
+
 .task-search-input .ant-select-selector {
-  font-size: 15px;             // 字体大小
+    font-size: 15px; // 字体大小
 }
+
 .task-search-input .ant-select-selection-placeholder {
-  font-size: 15px;             // placeholder 字体
+    font-size: 15px; // placeholder 字体
 }
+
 .task-search-input .ant-select-selection-item {
-  font-size: 15px;             // 已选值字体
+    font-size: 15px; // 已选值字体
 }
 
 

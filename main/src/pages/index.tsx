@@ -10,6 +10,7 @@ import TaskStatistics from './components/TaskStatistics';
 import dayjs from 'dayjs';
 import { getLocalStorage } from '@/utils';
 import Settings, { DEFAULT_SETTINGS_VALUE, SETTINGS_KEY } from './components/Settings';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 //任务数量
 interface countItem {
@@ -27,16 +28,16 @@ export default function IndexPage() {
     }
   )
   const [todayFinishCount, setTodayFinishCount] = useState(0);
-  const [todayRemainCount,setTodayRemainCount]=useState(0);
+  const [todayRemainCount, setTodayRemainCount] = useState(0);
 
-  useEffect(()=>{
-    const settingsValue=getLocalStorage(SETTINGS_KEY,DEFAULT_SETTINGS_VALUE);
+  useEffect(() => {
+    const settingsValue = getLocalStorage(SETTINGS_KEY, DEFAULT_SETTINGS_VALUE);
     var root = document.documentElement;
     root.style.setProperty('--color', settingsValue.mainColor);
     root.style.setProperty('--active', settingsValue.colorActive);
     root.style.setProperty('--radius', `${settingsValue.borderRadius}px`);
     console.log(`${settingsValue.borderRadius}px`)
-  },[])
+  }, [])
 
   const getCount = () => {
     api(apiConfig.count.url).then(res =>
@@ -47,10 +48,9 @@ export default function IndexPage() {
   const getTodayCount = () => {
     getApi(apiConfig.list.url, { tab: tabKey.DONE }).then(res => {
       if (res.code === 1) {
-        const todayStart=dayjs().startOf('day');
-        const latestTasks = res.data.filter((i: taskT) => 
-        {
-          const finishTime=dayjs(i.finishTime);
+        const todayStart = dayjs().startOf('day');
+        const latestTasks = res.data.filter((i: taskT) => {
+          const finishTime = dayjs(i.finishTime);
           return finishTime.isBefore(todayStart);
         }
         );
@@ -60,10 +60,9 @@ export default function IndexPage() {
     }).catch((e) => { console.log('Error:', e); });
     getApi(apiConfig.list.url, { tab: tabKey.DOING }).then(res => {
       if (res.code === 1) {
-        const todayEnd=dayjs().add(1, 'day').startOf('day');
-        const RemainTasks = res.data.filter((i: taskT) => 
-        {
-          const endTime=dayjs(i.endTime);
+        const todayEnd = dayjs().add(1, 'day').startOf('day');
+        const RemainTasks = res.data.filter((i: taskT) => {
+          const endTime = dayjs(i.endTime);
           return !endTime.isAfter(todayEnd);
         }
         );
@@ -78,17 +77,17 @@ export default function IndexPage() {
     getTodayCount();
   }, [isChange]);
 
-
   return (
     <div className='page container'>
       <MainMenu activeKey={tab} onClick={setTab} count={count} />
       <div className='right-page'>
-        {[tabKey.DOING, tabKey.DONE].includes(tab) &&
+        {
+          [tabKey.DOING, tabKey.DONE].includes(tab) &&
           <TaskList activeKey={tab} isChange={isChange} onClick={setIsChange} />
         }
         {tab === tabKey.CALENDAR && <TaskCalendar />}
-        {tab === tabKey.CHARTS && <TaskStatistics count={count} todayFinishCount={todayFinishCount} todayRemainCount={todayRemainCount}/>}
-        {tab===tabKey.SETTINGS &&<Settings />}
+        {tab === tabKey.CHARTS && <TaskStatistics count={count} todayFinishCount={todayFinishCount} todayRemainCount={todayRemainCount} />}
+        {tab === tabKey.SETTINGS && <Settings />}
       </div>
     </div>
   );

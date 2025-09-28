@@ -43,13 +43,13 @@ export default function TaskItem(props: iTaskItem) {
   const handleTime = dayjs(finishTime).fromNow()
 
   const isInRange = (activeKey === tabKey.DOING) && isBetween((endTime?endTime:dayjs(endTime)), dayjs(), dayjs().add(3, 'day'))
-  useEffect(()=>{
-    console.log(title,isInRange)
-    console.log('endTime',endTime)
-    console.log('now',dayjs().toString())
-    console.log('later',dayjs().add(3,'day').toString())
-    console.log(isBetween(dayjs(endTime), dayjs(), dayjs().add(3, 'day')))
-  },[])
+  // useEffect(()=>{
+  //   console.log(title,isInRange)
+  //   console.log('endTime',endTime)
+  //   console.log('now',dayjs().toString())
+  //   console.log('later',dayjs().add(3,'day').toString())
+  //   console.log(isBetween(dayjs(endTime), dayjs(), dayjs().add(3, 'day')))
+  // },[])
 
   return (
     <div className='task-item'>
