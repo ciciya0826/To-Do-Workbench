@@ -333,13 +333,13 @@ export default function TaskStatistics(props: iprops) {
     if (!currentItem?.includes(cardId)) return;
     const newItem = currentItem.filter((id: string) => id !== cardId);
     saveLocalStorage(VISIBLE_CARD, newItem);
-    setVisibleCard(getLocalStorage(VISIBLE_CARD, null));
+    setVisibleCard(getLocalStorage(VISIBLE_CARD, []));
   }
 
   const items =
     visibleCards.map(i => (
       {
-        label: (<Checkbox checked={getLocalStorage(VISIBLE_CARD, null).includes(i.i)} onChange={e => {
+        label: (<Checkbox checked={getLocalStorage(VISIBLE_CARD, []).includes(i.i)} onChange={e => {
           if (e.target.checked) {
             handleCheckBoxFocused(i.i);
           } else {

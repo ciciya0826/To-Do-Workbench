@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import { getLocalStorage, saveLocalStorage } from '@/utils';
 
 export const SETTINGS_KEY = 'settings-value';
-const MAIN_COLOR = "#1677ff";
-const COLOR_ACTIVE = "#5fff6a";
-const BORDER_RADIUS = 6;
+const MAIN_COLOR = "#7ce5ef";
+const COLOR_ACTIVE = "#f4bff4";
+const BORDER_RADIUS = "20";
 export const DEFAULT_SETTINGS_VALUE = { mainColor: MAIN_COLOR, colorActive: COLOR_ACTIVE, borderRadius: BORDER_RADIUS }
 
 export default function Settings() {

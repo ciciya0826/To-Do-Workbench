@@ -42,7 +42,7 @@ export default function TaskItem(props: iTaskItem) {
   const overTime = dayjs(endTime).fromNow() //截止时间
   const handleTime = dayjs(finishTime).fromNow()
 
-  const isInRange = (activeKey === tabKey.DOING) && isBetween((endTime?endTime:dayjs(endTime)), dayjs(), dayjs().add(3, 'day'))
+  const isInRange = (activeKey === tabKey.DOING) && isBetween((endTime ? endTime : dayjs(endTime)), dayjs(), dayjs().add(3, 'day'))
   // useEffect(()=>{
   //   console.log(title,isInRange)
   //   console.log('endTime',endTime)
@@ -57,7 +57,7 @@ export default function TaskItem(props: iTaskItem) {
         <div className='task-item_title'>{title}</div>
       </div>
       <div className='task-item_status'>
-        <button className='task-item_finish-btn' onClick={onFinish}>{activeKey===tabKey.DOING&&'完成'}{activeKey===tabKey.DONE&&'未完成'}</button>
+        <button className='task-item_finish-btn' onClick={onFinish}>{activeKey === tabKey.DOING && '完成'}{activeKey === tabKey.DONE && '未完成'}</button>
         <button className='task-item_delete-btn' onClick={onDelete}>删除</button>
       </div>
       <div className='divide'></div>
@@ -70,9 +70,9 @@ export default function TaskItem(props: iTaskItem) {
           <div className='task-item-ddl_text'>结束时间</div>
           <div className='task-item-ddl_time'>{endTime ? endTime.format('YYYY-MM-DD HH:mm:ss') : null}</div>
         </div>
-        {isInRange && <div className={`task-item-timeout ${dayjs(endTime).isBefore(dayjs()) || activeKey===tabKey.DOING ? 'task-item_timeout_over' : ''}`}>
+        {((activeKey === tabKey.DOING && isInRange) || activeKey === tabKey.DONE) && <div className={`task-item-timeout ${dayjs(endTime).isBefore(dayjs()) || activeKey === tabKey.DOING ? 'task-item_timeout_over' : ''}`}>
           <div className='task-item-timeout_text'>截止状态</div>
-          <div className={`task-item-timeout_time ${dayjs(endTime).isBefore(dayjs()) || activeKey === tabKey.DOING ? 'task-item_timeout_over' : ''}`}>{activeKey === tabKey.DONE ? overTime : handleTime}{activeKey === tabKey.DONE ? '截止' : '完成'}</div>
+          <div className={`task-item-timeout_time ${(dayjs(endTime).isBefore(dayjs()) && activeKey === tabKey.DOING) ? 'task-item_timeout_over':''}`}>{activeKey === tabKey.DONE ? handleTime:overTime}{activeKey === tabKey.DONE ? '完成':'截止'}</div>
         </div>}
       </div>
     </div >

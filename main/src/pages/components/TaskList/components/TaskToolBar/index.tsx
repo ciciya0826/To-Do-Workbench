@@ -55,7 +55,7 @@ export default function TaskToolBar(props: iprops) {
             key: 'startTime',
         },
         {
-            label: '按任务截止时间',
+            label: activeKey===tabKey.DOING?'按任务截止时间':'按任务完成时间',
             key: 'endTime',
         },
     ];

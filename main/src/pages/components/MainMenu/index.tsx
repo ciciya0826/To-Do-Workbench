@@ -1,7 +1,7 @@
 import './index.less';
 import MenuItem from './MenuItem';
 import Config from './config';
-import { useEffect, useState } from 'react';
+import logo from "../../../assets/logoIn.png";
 
 interface countItem {
     doingCount: number,
@@ -15,15 +15,12 @@ interface iprops {
 }
 
 export default function MainMenu(props: iprops) {
-    
     const { activeKey, onClick ,count} = props;
 
-    
     return (
         <div className='main-menu'>
-            <div>
-                {/* <h1 className='title'>//</h1> */}
-            </div>
+                <img className='logo-div' src={logo} />
+                <h3>Todo_work_brench</h3>
             {Config.map((i) => {
                 return (<MenuItem
                     name={i.name}

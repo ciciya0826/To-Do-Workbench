@@ -12,11 +12,13 @@ var app = express();
 //解决跨域问题
 const cors = require('cors');
 app.use(cors({
-  origin: 'http://localhost:8000',  // 允许的前端地址
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],  // 允许的方法
-  allowedHeaders: ['Content-Type', 'Authorization'],  // 允许的请求头
-  exposedHeaders: ['myHeader'],  // 暴露的自定义响应头
-  credentials: true // 如果需要携带 cookie
+  // origin: ['http://localhost:8000','http://localhost:3000'],  // 允许的前端地址
+  // methods: ['GET', 'POST', 'PUT', 'DELETE'],  // 允许的方法
+  // allowedHeaders: ['Content-Type', 'Authorization'],  // 允许的请求头
+  // exposedHeaders: ['myHeader'],  // 暴露的自定义响应头
+  // credentials: true // 如果需要携带 cookie
+  origin: true,  // 或具体写 electron 加载的那个地址
+  credentials: true
 }));
 
 // view engine setup

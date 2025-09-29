@@ -1,340 +1,277 @@
 var express = require('express');
 var router = express.Router();
-const fs = require('fs');
+const fs = require('fs').promises;
+const fsSync = require('fs');
 const path = require('path');
 
+const dbPath = path.join(__dirname, '..', 'db');
+const doingFile = path.join(dbPath, 'DOING.json');
+const doneFile = path.join(dbPath, 'DONE.json');
+
+// 确保数据库目录存在
+if (!fsSync.existsSync(dbPath)) {
+  fsSync.mkdirSync(dbPath, { recursive: true });
+}
+
+// 简单的文件锁机制，防止并发写入
+const fileLocks = {
+  [doingFile]: false,
+  [doneFile]: false
+};
+
+// 等待文件解锁
+async function waitForFileUnlock(filePath) {
+  while (fileLocks[filePath]) {
+    await new Promise(resolve => setTimeout(resolve, 10));
+  }
+  fileLocks[filePath] = true;
+}
+
+// 释放文件锁
+function releaseFileLock(filePath) {
+  fileLocks[filePath] = false;
+}
+
+/** 确保文件存在且是合法 JSON 数组 */
+async function ensureFile(file) {
+  try {
+    await fs.access(file);
+    const content = await fs.readFile(file, 'utf8');
+    // 尝试解析，不直接覆盖
+    JSON.parse(content || '[]');
+  } catch (err) {
+    // 只有文件不存在时才创建空数组，已存在但损坏的情况保留原文件以便排查
+    if (err.code === 'ENOENT') {
+      await fs.writeFile(file, '[]', 'utf8');
+    } else {
+      console.error(`文件 ${file} 格式错误，未自动修复:`, err);
+      throw new Error(`文件格式错误: ${file}`);
+    }
+  }
+}
+
+// 初始化时确保文件存在
+(async () => {
+  try {
+    await ensureFile(doingFile);
+    await ensureFile(doneFile);
+  } catch (err) {
+    console.error('初始化文件失败:', err);
+  }
+})();
+
+function safeParse(str) {
+  if (!str) return [];
+  try { return JSON.parse(str); } catch { return []; }
+}
+
 /* GET home page. */
-router.get('/', function (req, res, next) {
+router.get('/', function (req, res) {
   res.render('index', { title: 'Express' });
 });
 
-//更新任务列表
-router.get('/list', function (req, res, next) {
-  const type = req.query.tab;
-  const dbPath = path.join(__dirname, '..', 'db')
-  const dbFile = type === '0' ? `${dbPath}\\DOING.json` : `${dbPath}\\DONE.json`
-  fs.readFile(dbFile, 'utf8', (rerr, content) => {
-    if (rerr) { //读文件错误
-      res.send({
-        data: '',
-        code: 0,
-        msg: rerr
-      })
-      return;
-    }
-    res.send({
-      data: JSON.parse(content),
-      code: 1,
-    });
-  });
+// 更新任务列表
+router.get('/list', async function (req, res) {
+  try {
+    const type = req.query.tab;
+    const dbFile = type === '0' ? doingFile : doneFile;
+    
+    await waitForFileUnlock(dbFile);
+    const content = await fs.readFile(dbFile, 'utf8');
+    releaseFileLock(dbFile);
+    
+    res.send({ data: safeParse(content), code: 1 });
+  } catch (err) {
+    res.send({ data: '', code: 0, msg: err.message });
+  }
 });
 
-//排序
-router.get('/sort', function (req, res, next) {
-  // console.log('req',req.query)
-  const sortType = req.query.sort;  //排序方式
-  const type = req.query.tab;
-  const dbPath = path.join(__dirname, '..', 'db')
-  const dbFile = type === '0' ? `${dbPath}\\DOING.json` : `${dbPath}\\DONE.json`
-  fs.readFile(dbFile, 'utf8', (rerr, content) => {
-    if (rerr) { //读文件错误
-      res.send({
-        data: '',
-        code: 0,
-        msg: rerr
-      })
-      return;
-    }
-    // console.log('sortType', sortType);
-    const data = JSON.parse(content);
-    // console.log('before',data);
+// 排序
+router.get('/sort', async function (req, res) {
+  try {
+    const sortType = req.query.sort;
+    const type = req.query.tab;
+    const dbFile = type === '0' ? doingFile : doneFile;
+    
+    await waitForFileUnlock(dbFile);
+    const content = await fs.readFile(dbFile, 'utf8');
+    const data = safeParse(content);
+    
     if (sortType === 'start') {
-      data.sort((a, b) => {
-        const sa = a.startTime
-        const sb = b.startTime
-        return new Date(sa).getTime() - new Date(sb).getTime();
-      });
-      // console.log('after',data);
+      data.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
     } else {
-      data.sort((a, b) => {
-        const sa = a.endTime?.valueOf() ?? 0
-        const sb = b.endTime?.valueOf() ?? 0
-        return new Date(sa).getTime() - new Date(sb).getTime();
-      });
+      data.sort((a, b) =>
+        new Date(a.endTime || 0).getTime() - new Date(b.endTime || 0).getTime()
+      );
     }
-    const newContent=JSON.stringify(data);
-    fs.writeFile(dbFile, newContent, werr => {
-      if (werr) {
-        res.send({
-          data: '',
-          code: 0,
-          msg: werr
-        })
-        return;
-      }
-      res.send({
-        data: data,
-        code: 1,
-        msg: ''
-      });
-    });
-  });
-});
-
-//创建任务
-router.post('/create', function (req, res, next) {
-  const dbFile = path.join(__dirname, '..', 'db', 'DOING.json')
-  fs.readFile(dbFile, 'utf8', (rerr, data) => {
-    if (rerr) { //读文件错误
-      res.send({
-        data: '',
-        code: 0,
-        msg: rerr
-      })
-      return;
-    }
-    let newTasks;
-    if (data === null) {
-      newTasks = JSON.stringify(data);
-    } else {
-      newTasks = JSON.stringify([...JSON.parse(data), req.body]);
-    }
-    fs.writeFile(dbFile, newTasks, werr => {
-      if (werr) {
-        res.send({
-          data: '',
-          code: 0,
-          msg: werr
-        })
-        return;
-      }
-    });
-    res.send(data);
-  });
-
-});
-
-//删除任务  
-router.post('/remove', function (req, res, next) {
-  const type = req.body.tab;
-  const dbPath = path.join(__dirname, '..', 'db')
-  const dbFile = type === 0 ? `${dbPath}\\DOING.json` : `${dbPath}\\DONE.json`
-  const taskID = req.body?.taskID;
-  if (!taskID) {
-    res.send({
-      data: '',
-      code: 0,
-      msg: '非法任务ID'
-    });
-    return;
+    
+    await fs.writeFile(dbFile, JSON.stringify(data));
+    releaseFileLock(dbFile);
+    
+    res.send({ data, code: 1, msg: '' });
+  } catch (err) {
+    res.send({ data: '', code: 0, msg: err.message });
   }
-  fs.readFile(dbFile, 'utf8', (rerr, dataStr) => {
-    if (rerr) { //读文件错误
-      res.send({
-        data: '',
-        code: 0,
-        msg: rerr
-      })
-      return;
-    }
-    let newTasks;
-    const data = dataStr ? JSON.parse(dataStr) : null;
+});
+
+// 创建任务
+router.post('/create', async function (req, res) {
+  try {
+    await waitForFileUnlock(doingFile);
+    const content = await fs.readFile(doingFile, 'utf8');
+    
+    const current = safeParse(content);
+    const newTasks = [...current, req.body];
+    await fs.writeFile(doingFile, JSON.stringify(newTasks));
+    releaseFileLock(doingFile);
+    
+    res.send({ data: req.body, code: 1 });
+  } catch (err) {
+    releaseFileLock(doingFile); // 确保释放锁
+    res.send({ data: '', code: 0, msg: err.message });
+  }
+});
+
+// 删除任务
+router.post('/remove', async function (req, res) {
+  try {
+    const type = req.body.tab;
+    const dbFile = type === 0 ? doingFile : doneFile;
+    const taskID = req.body?.taskID;
+    
+    if (!taskID) return res.send({ data: '', code: 0, msg: '非法任务ID' });
+    
+    await waitForFileUnlock(dbFile);
+    const content = await fs.readFile(dbFile, 'utf8');
+    const data = safeParse(content);
+    
     const removeTarget = data.find(i => i.taskID === taskID);
-    if (data.length === 0 || !removeTarget) {
-      res.send({
-        data: '',
-        code: 0,
-        msg: '无效'
-      });
-      return;
+    if (!data.length || !removeTarget) {
+      releaseFileLock(dbFile);
+      return res.send({ data: '', code: 0, msg: '无效' });
     }
-    newTasks = JSON.stringify(data.filter(i => i.taskID !== taskID));
-    fs.writeFile(dbFile, newTasks, werr => {
-      if (werr) {
-        res.send({
-          data: '',
-          code: 0,
-          msg: werr
-        })
-        return;
-      }
-      res.send({
-        data: type,
-        code: 1,
-        msg: ''
-      });
-    });
-  });
-});
-
-//编辑任务  tab现在在哪个列表 status写入哪个文件
-router.post('/update', function (req, res, next) {
-  const doingFile = path.join(__dirname, '..', 'db', 'DOING.json')
-  const doneFile = path.join(__dirname, '..', 'db', 'DONE.json')
-  const updateTask = req.body;
-  const taskID = req.body?.taskID;
-  const finishTime = req.body.finishTime;
-  const status = Number(req.body.status);
-  const tab = req.body.tab;
-  const readFile = tab === 0 ? doingFile : doneFile;  //要读的文件
-  const writeFile = status === 0 ? doingFile : doneFile;  //要写入的文件
-  // console.log('stasus',status);
-  // console.log('tab',tab);
-  if (!updateTask) {
-    res.send({
-      data: '',
-      code: 0,
-      msg: '编辑任务为空'
-    });
-    return;
+    
+    const newTasks = data.filter(i => i.taskID !== taskID);
+    await fs.writeFile(dbFile, JSON.stringify(newTasks));
+    releaseFileLock(dbFile);
+    
+    res.send({ data: type, code: 1, msg: '' });
+  } catch (err) {
+    res.send({ data: '', code: 0, msg: err.message });
   }
-  fs.readFile(readFile, 'utf8', (rerr, readDataStr) => {
-    if (rerr) { //读文件错误
-      res.send({
-        data: '',
-        code: 0,
-        msg: rerr
-      })
-      return;
+});
+
+// 编辑任务
+router.post('/update', async function (req, res) {
+  try {
+    const updateTask = req.body;
+    const taskID = req.body?.taskID;
+    const status = Number(req.body.status);
+    const tab = req.body.tab;
+
+    const readFile = tab === 0 ? doingFile : doneFile;
+    const writeFile = status === 0 ? doingFile : doneFile;
+    
+    if (!updateTask || !taskID) {
+      return res.send({ data: '', code: 0, msg: '编辑任务信息不完整' });
     }
-    const readData = readDataStr ? JSON.parse(readDataStr) : null;
-    const target = readData.find(i => i.taskID === taskID); //找到点击的任务
-    // console.log('readData',readData);
-    // console.log('readData.lengtn',readData.length);
-    // console.log('target',target);
-    if (readData.length === 0 || !target) {
-      res.send({
-        data: '',
-        code: 0,
-        msg: '任务错误'
-      });
-      return;
+
+    // 加锁相关文件
+    if (readFile !== writeFile) {
+      await waitForFileUnlock(readFile);
+      await waitForFileUnlock(writeFile);
+    } else {
+      await waitForFileUnlock(readFile);
     }
-    let newReadTasks, newWriteTasks;
-    //编辑栏
+
+    // 读取源文件
+    const readDataStr = await fs.readFile(readFile, 'utf8');
+    const readData = safeParse(readDataStr);
+    const target = readData.find(i => i.taskID === taskID);
+    
+    if (!target) {
+      throw new Error('任务不存在');
+    }
+
     if (status === tab) {
-      newReadTasks = readData.filter(i => i.taskID !== taskID)
-      newReadTasks = JSON.stringify([...newReadTasks, updateTask]);
-      fs.writeFile(writeFile, newReadTasks, werr => {
-        if (werr) {
-          res.send({
-            data: '',
-            code: 0,
-            msg: werr
-          })
-          return;
-        }
-        res.send({
-          data: newReadTasks,
-          code: 1,
-          msg: ''
-        });
-      });
-    } else {  //完成栏
-      fs.readFile(writeFile, 'utf8', (rerr, writeDataStr) => {
-        if (rerr) { //读文件错误
-          res.send({
-            data: '',
-            code: 0,
-            msg: rerr
-          })
-          return;
-        }
-        const writeData = JSON.parse(writeDataStr);
-        let newTask;
-        newTask = readData.find(i => i.taskID === taskID);
-        newTask = Object.assign(newTask, updateTask);
-        newReadTasks = JSON.stringify(readData.filter(i => i.taskID !== taskID));
-        writeData.push(newTask);
-        newWriteTasks = JSON.stringify(writeData);
-        fs.writeFile(readFile, newReadTasks, werr => {
-          if (werr) {
-            res.send({
-              data: '',
-              code: 0,
-              msg: werr
-            })
-            return;
-          }
-        });
-        // console.log('readFile',readFile);
-        // console.log('writeFile',writeFile);
-        fs.writeFile(writeFile, newWriteTasks, werr => {
-          if (werr) {
-            res.send({
-              data: '',
-              code: 0,
-              msg: werr
-            })
-            return;
-          }
-          res.send({
-            data: newWriteTasks,
-            code: 1,
-            msg: ''
-          });
-        });
-      });
+      // 同一状态下的更新
+      const newReadTasks = [
+        ...readData.filter(i => i.taskID !== taskID),
+        updateTask,
+      ];
+      await fs.writeFile(writeFile, JSON.stringify(newReadTasks));
+    } else {
+      // 跨状态更新
+      const writeDataStr = await fs.readFile(writeFile, 'utf8');
+      const writeData = safeParse(writeDataStr);
+      
+      const newTask = { ...target, ...updateTask };
+      const newReadTasks = readData.filter(i => i.taskID !== taskID);
+      const newWriteTasks = [...writeData, newTask];
+      
+      await fs.writeFile(readFile, JSON.stringify(newReadTasks));
+      await fs.writeFile(writeFile, JSON.stringify(newWriteTasks));
     }
-  });
+
+    // 释放锁
+    if (readFile !== writeFile) {
+      releaseFileLock(readFile);
+      releaseFileLock(writeFile);
+    } else {
+      releaseFileLock(readFile);
+    }
+
+    res.send({ data: updateTask, code: 1, msg: '' });
+  } catch (err) {
+    // 确保释放所有可能的锁
+    releaseFileLock(doingFile);
+    releaseFileLock(doneFile);
+    res.send({ data: '', code: 0, msg: err.message });
+  }
 });
 
-//获取任务数量
-router.get('/count', function (req, res, next) {
-  const doingFile = path.join(__dirname, '..', 'db', 'DOING.json')
-  const doneFile = path.join(__dirname, '..', 'db', 'DONE.json')
-  fs.readFile(doingFile, 'utf8', (rerr, doingDataStr) => {
-    if (rerr) { //读文件错误
-      res.send({
-        data: '',
-        code: 0,
-        msg: rerr
-      })
-      return;
-    }
-    const doingData = doingDataStr ? JSON.parse(doingDataStr) : null;
-    fs.readFile(doneFile, 'utf8', (rerr, doneDataStr) => {
-      if (rerr) { //读文件错误
-        res.send({
-          data: '',
-          code: 0,
-          msg: rerr
-        })
-        return;
-      }
-      const doneData = doneDataStr ? JSON.parse(doneDataStr) : null;
-      res.send({
-        data: {
-          doingCount: doingData.length,
-          doneCount: doneData.length
-        },
-        code: 1,
-      });
-    })
-  })
-});
-
-//搜索
-router.get('/search', function (req, res, next) {
-  const type = req.query.tab;
-  const taskIDArray=req.query.searchID;
-  const dbPath = path.join(__dirname, '..', 'db')
-  const dbFile = type === '0' ? `${dbPath}\\DOING.json` : `${dbPath}\\DONE.json`
-  fs.readFile(dbFile, 'utf8', (rerr, content) => {
-    if (rerr) { //读文件错误
-      res.send({
-        data: '',
-        code: 0,
-        msg: rerr
-      })
-      return;
-    }
-    const data=JSON.parse(content).filter(i=>taskIDArray.includes(i.taskID));
+// 获取任务数量
+router.get('/count', async function (req, res) {
+  try {
+    await waitForFileUnlock(doingFile);
+    const doingDataStr = await fs.readFile(doingFile, 'utf8');
+    releaseFileLock(doingFile);
+    
+    await waitForFileUnlock(doneFile);
+    const doneDataStr = await fs.readFile(doneFile, 'utf8');
+    releaseFileLock(doneFile);
+    
+    const doingData = safeParse(doingDataStr);
+    const doneData = safeParse(doneDataStr);
+    
     res.send({
-      data: data,
+      data: {
+        doingCount: doingData.length,
+        doneCount: doneData.length,
+      },
       code: 1,
     });
-  });
+  } catch (err) {
+    res.send({ data: '', code: 0, msg: err.message });
+  }
+});
+
+// 搜索
+router.get('/search', async function (req, res) {
+  try {
+    const type = req.query.tab;
+    const taskIDArray = req.query.searchID;
+    const dbFile = type === '0' ? doingFile : doneFile;
+    
+    await waitForFileUnlock(dbFile);
+    const content = await fs.readFile(dbFile, 'utf8');
+    releaseFileLock(dbFile);
+    
+    const data = safeParse(content).filter(i => taskIDArray.includes(i.taskID));
+    res.send({ data, code: 1 });
+  } catch (err) {
+    res.send({ data: '', code: 0, msg: err.message });
+  }
 });
 
 module.exports = router;
