@@ -379,7 +379,7 @@ export default function TaskStatistics(props: iprops) {
           layout={layout}
           allowOverlap={true}       // 允许卡片重叠
           compactType={null}
-          cols={50}
+          cols={30}
           rowHeight={5} //每行多少px
           maxRows={40}  //最多的行数
           width={1160}
