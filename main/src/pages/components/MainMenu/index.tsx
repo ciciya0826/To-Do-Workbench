@@ -20,7 +20,7 @@ export default function MainMenu(props: iprops) {
     return (
         <div className='main-menu'>
                 <img className='logo-div' src={logo} />
-                <h3>Todo_work_brench</h3>
+                <h3>Todo_workbench</h3>
             {Config.map((i) => {
                 return (<MenuItem
                     name={i.name}

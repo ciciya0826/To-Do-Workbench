@@ -4,7 +4,20 @@ const fs = require('fs').promises;
 const fsSync = require('fs');
 const path = require('path');
 
-const dbPath = path.join(__dirname, '..', 'db');
+// Electron app 用于判断路径
+const electron = require('electron');
+let basePath;
+
+// 判断是否打包
+if (process.mainModule.filename.includes('app.asar')) {
+  // 打包后路径：app.asar.unpacked 下的 server 文件夹
+  basePath = path.join(process.resourcesPath, 'app.asar.unpacked', 'server');
+} else {
+  // 开发模式
+  basePath = path.join(__dirname, '..');
+}
+
+const dbPath = path.join(basePath, 'db');
 const doingFile = path.join(dbPath, 'DOING.json');
 const doneFile = path.join(dbPath, 'DONE.json');
 
@@ -13,74 +26,68 @@ if (!fsSync.existsSync(dbPath)) {
   fsSync.mkdirSync(dbPath, { recursive: true });
 }
 
-// 简单的文件锁机制，防止并发写入
+// 简单的写操作锁
 const fileLocks = {
   [doingFile]: false,
   [doneFile]: false
 };
 
-// 等待文件解锁
 async function waitForFileUnlock(filePath) {
   while (fileLocks[filePath]) {
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise(resolve => setTimeout(resolve, 5));
   }
   fileLocks[filePath] = true;
 }
 
-// 释放文件锁
 function releaseFileLock(filePath) {
   fileLocks[filePath] = false;
 }
-
-/** 确保文件存在且是合法 JSON 数组 */
-async function ensureFile(file) {
-  try {
-    await fs.access(file);
-    const content = await fs.readFile(file, 'utf8');
-    // 尝试解析，不直接覆盖
-    JSON.parse(content || '[]');
-  } catch (err) {
-    // 只有文件不存在时才创建空数组，已存在但损坏的情况保留原文件以便排查
-    if (err.code === 'ENOENT') {
-      await fs.writeFile(file, '[]', 'utf8');
-    } else {
-      console.error(`文件 ${file} 格式错误，未自动修复:`, err);
-      throw new Error(`文件格式错误: ${file}`);
-    }
-  }
-}
-
-// 初始化时确保文件存在
-(async () => {
-  try {
-    await ensureFile(doingFile);
-    await ensureFile(doneFile);
-  } catch (err) {
-    console.error('初始化文件失败:', err);
-  }
-})();
 
 function safeParse(str) {
   if (!str) return [];
   try { return JSON.parse(str); } catch { return []; }
 }
 
-/* GET home page. */
+// 内存缓存
+let doingCache = [];
+let doneCache = [];
+
+// 初始化文件和缓存
+async function ensureFile(file, cacheArray) {
+  try {
+    await fs.access(file);
+    const content = await fs.readFile(file, 'utf8');
+    cacheArray.push(...safeParse(content));
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      await fs.writeFile(file, '[]', 'utf8');
+    } else {
+      console.error(`文件 ${file} 格式错误:`, err);
+      throw err;
+    }
+  }
+}
+
+(async () => {
+  try {
+    await ensureFile(doingFile, doingCache);
+    await ensureFile(doneFile, doneCache);
+  } catch (err) {
+    console.error('初始化文件失败:', err);
+  }
+})();
+
+/* GET home page */
 router.get('/', function (req, res) {
   res.render('index', { title: 'Express' });
 });
 
-// 更新任务列表
+// 获取任务列表
 router.get('/list', async function (req, res) {
   try {
     const type = req.query.tab;
-    const dbFile = type === '0' ? doingFile : doneFile;
-    
-    await waitForFileUnlock(dbFile);
-    const content = await fs.readFile(dbFile, 'utf8');
-    releaseFileLock(dbFile);
-    
-    res.send({ data: safeParse(content), code: 1 });
+    const data = type === '0' ? doingCache : doneCache;
+    res.send({ data, code: 1 });
   } catch (err) {
     res.send({ data: '', code: 0, msg: err.message });
   }
@@ -91,24 +98,16 @@ router.get('/sort', async function (req, res) {
   try {
     const sortType = req.query.sort;
     const type = req.query.tab;
-    const dbFile = type === '0' ? doingFile : doneFile;
-    
-    await waitForFileUnlock(dbFile);
-    const content = await fs.readFile(dbFile, 'utf8');
-    const data = safeParse(content);
-    
+    const data = type === '0' ? doingCache : doneCache;
+
+    const sortedData = [...data];
     if (sortType === 'start') {
-      data.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+      sortedData.sort((a, b) => Date.parse(a.startTime) - Date.parse(b.startTime));
     } else {
-      data.sort((a, b) =>
-        new Date(a.endTime || 0).getTime() - new Date(b.endTime || 0).getTime()
-      );
+      sortedData.sort((a, b) => Date.parse(a.endTime || 0) - Date.parse(b.endTime || 0));
     }
-    
-    await fs.writeFile(dbFile, JSON.stringify(data));
-    releaseFileLock(dbFile);
-    
-    res.send({ data, code: 1, msg: '' });
+
+    res.send({ data: sortedData, code: 1, msg: '' });
   } catch (err) {
     res.send({ data: '', code: 0, msg: err.message });
   }
@@ -118,16 +117,15 @@ router.get('/sort', async function (req, res) {
 router.post('/create', async function (req, res) {
   try {
     await waitForFileUnlock(doingFile);
-    const content = await fs.readFile(doingFile, 'utf8');
-    
-    const current = safeParse(content);
-    const newTasks = [...current, req.body];
-    await fs.writeFile(doingFile, JSON.stringify(newTasks));
+
+    doingCache.push(req.body);
+
+    fs.writeFile(doingFile, JSON.stringify(doingCache)).catch(console.error);
     releaseFileLock(doingFile);
-    
+
     res.send({ data: req.body, code: 1 });
   } catch (err) {
-    releaseFileLock(doingFile); // 确保释放锁
+    releaseFileLock(doingFile);
     res.send({ data: '', code: 0, msg: err.message });
   }
 });
@@ -137,26 +135,28 @@ router.post('/remove', async function (req, res) {
   try {
     const type = req.body.tab;
     const dbFile = type === 0 ? doingFile : doneFile;
+    const cache = type === 0 ? doingCache : doneCache;
     const taskID = req.body?.taskID;
-    
+
     if (!taskID) return res.send({ data: '', code: 0, msg: '非法任务ID' });
-    
+
     await waitForFileUnlock(dbFile);
-    const content = await fs.readFile(dbFile, 'utf8');
-    const data = safeParse(content);
-    
-    const removeTarget = data.find(i => i.taskID === taskID);
-    if (!data.length || !removeTarget) {
+
+    const index = cache.findIndex(i => i.taskID === taskID);
+    if (index === -1) {
       releaseFileLock(dbFile);
-      return res.send({ data: '', code: 0, msg: '无效' });
+      return res.send({ data: '', code: 0, msg: '任务不存在' });
     }
-    
-    const newTasks = data.filter(i => i.taskID !== taskID);
-    await fs.writeFile(dbFile, JSON.stringify(newTasks));
+
+    cache.splice(index, 1);
+
+    fs.writeFile(dbFile, JSON.stringify(cache)).catch(console.error);
     releaseFileLock(dbFile);
-    
+
     res.send({ data: type, code: 1, msg: '' });
   } catch (err) {
+    releaseFileLock(doingFile);
+    releaseFileLock(doneFile);
     res.send({ data: '', code: 0, msg: err.message });
   }
 });
@@ -169,14 +169,13 @@ router.post('/update', async function (req, res) {
     const status = Number(req.body.status);
     const tab = req.body.tab;
 
+    if (!updateTask || !taskID) return res.send({ data: '', code: 0, msg: '编辑任务信息不完整' });
+
+    const readCache = tab === 0 ? doingCache : doneCache;
+    const writeCache = status === 0 ? doingCache : doneCache;
     const readFile = tab === 0 ? doingFile : doneFile;
     const writeFile = status === 0 ? doingFile : doneFile;
-    
-    if (!updateTask || !taskID) {
-      return res.send({ data: '', code: 0, msg: '编辑任务信息不完整' });
-    }
 
-    // 加锁相关文件
     if (readFile !== writeFile) {
       await waitForFileUnlock(readFile);
       await waitForFileUnlock(writeFile);
@@ -184,36 +183,22 @@ router.post('/update', async function (req, res) {
       await waitForFileUnlock(readFile);
     }
 
-    // 读取源文件
-    const readDataStr = await fs.readFile(readFile, 'utf8');
-    const readData = safeParse(readDataStr);
-    const target = readData.find(i => i.taskID === taskID);
-    
-    if (!target) {
-      throw new Error('任务不存在');
-    }
+    const index = readCache.findIndex(i => i.taskID === taskID);
+    if (index === -1) throw new Error('任务不存在');
 
-    if (status === tab) {
-      // 同一状态下的更新
-      const newReadTasks = [
-        ...readData.filter(i => i.taskID !== taskID),
-        updateTask,
-      ];
-      await fs.writeFile(writeFile, JSON.stringify(newReadTasks));
+    const target = readCache[index];
+    const newTask = { ...target, ...updateTask };
+
+    if (readCache === writeCache) {
+      readCache[index] = newTask;
+      fs.writeFile(writeFile, JSON.stringify(writeCache)).catch(console.error);
     } else {
-      // 跨状态更新
-      const writeDataStr = await fs.readFile(writeFile, 'utf8');
-      const writeData = safeParse(writeDataStr);
-      
-      const newTask = { ...target, ...updateTask };
-      const newReadTasks = readData.filter(i => i.taskID !== taskID);
-      const newWriteTasks = [...writeData, newTask];
-      
-      await fs.writeFile(readFile, JSON.stringify(newReadTasks));
-      await fs.writeFile(writeFile, JSON.stringify(newWriteTasks));
+      readCache.splice(index, 1);
+      writeCache.push(newTask);
+      fs.writeFile(readFile, JSON.stringify(readCache)).catch(console.error);
+      fs.writeFile(writeFile, JSON.stringify(writeCache)).catch(console.error);
     }
 
-    // 释放锁
     if (readFile !== writeFile) {
       releaseFileLock(readFile);
       releaseFileLock(writeFile);
@@ -221,9 +206,8 @@ router.post('/update', async function (req, res) {
       releaseFileLock(readFile);
     }
 
-    res.send({ data: updateTask, code: 1, msg: '' });
+    res.send({ data: newTask, code: 1, msg: '' });
   } catch (err) {
-    // 确保释放所有可能的锁
     releaseFileLock(doingFile);
     releaseFileLock(doneFile);
     res.send({ data: '', code: 0, msg: err.message });
@@ -233,42 +217,23 @@ router.post('/update', async function (req, res) {
 // 获取任务数量
 router.get('/count', async function (req, res) {
   try {
-    await waitForFileUnlock(doingFile);
-    const doingDataStr = await fs.readFile(doingFile, 'utf8');
-    releaseFileLock(doingFile);
-    
-    await waitForFileUnlock(doneFile);
-    const doneDataStr = await fs.readFile(doneFile, 'utf8');
-    releaseFileLock(doneFile);
-    
-    const doingData = safeParse(doingDataStr);
-    const doneData = safeParse(doneDataStr);
-    
-    res.send({
-      data: {
-        doingCount: doingData.length,
-        doneCount: doneData.length,
-      },
-      code: 1,
-    });
+    res.send({ data: { doingCount: doingCache.length, doneCount: doneCache.length }, code: 1 });
   } catch (err) {
     res.send({ data: '', code: 0, msg: err.message });
   }
 });
 
-// 搜索
+// 搜索任务
 router.get('/search', async function (req, res) {
   try {
     const type = req.query.tab;
     const taskIDArray = req.query.searchID;
-    const dbFile = type === '0' ? doingFile : doneFile;
-    
-    await waitForFileUnlock(dbFile);
-    const content = await fs.readFile(dbFile, 'utf8');
-    releaseFileLock(dbFile);
-    
-    const data = safeParse(content).filter(i => taskIDArray.includes(i.taskID));
-    res.send({ data, code: 1 });
+    const data = type === '0' ? doingCache : doneCache;
+
+    const idSet = new Set(taskIDArray);
+    const result = data.filter(i => idSet.has(i.taskID));
+
+    res.send({ data: result, code: 1 });
   } catch (err) {
     res.send({ data: '', code: 0, msg: err.message });
   }
