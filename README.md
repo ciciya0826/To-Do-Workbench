@@ -9,8 +9,4 @@
 2. 将这个函数放入到electron创建窗口时使用，启动这个的服务器
 3. 再在electron的页面中用iframe属性将express页面的链接放进来，使用CSS控制使撑满屏幕
 
-## 页面
-### 主菜单
-
-每一栏由多个接口实现的menuItem遍历组成
-### 任务列表
+在app中`yarn make`打包生成文件
