@@ -96,22 +96,36 @@ router.get('/list', async function (req, res) {
 // 排序
 router.get('/sort', async function (req, res) {
   try {
-    const sortType = req.query.sort;
-    const type = req.query.tab;
+    const sortType = req.query.sort; // start / end
+    const type = req.query.tab;      // 0 / 1
     const data = type === '0' ? doingCache : doneCache;
+    const file = type === '0' ? doingFile : doneFile;
 
-    const sortedData = [...data];
-    if (sortType === 'start') {
-      sortedData.sort((a, b) => Date.parse(a.startTime) - Date.parse(b.startTime));
-    } else {
-      sortedData.sort((a, b) => Date.parse(a.endTime || 0) - Date.parse(b.endTime || 0));
-    }
+    // 加锁防止并发写入
+    await waitForFileUnlock(file);
 
-    res.send({ data: sortedData, code: 1, msg: '' });
+    // 排序缓存
+    data.sort((a, b) => {
+      if (sortType === 'start') {
+        return Date.parse(a.startTime) - Date.parse(b.startTime);
+      } else {
+        return Date.parse(a.endTime || 0) - Date.parse(b.endTime || 0);
+      }
+    });
+
+    // 异步写回磁盘
+    fs.writeFile(file, JSON.stringify(data)).catch(console.error);
+
+    releaseFileLock(file);
+
+    res.send({ data, code: 1, msg: '' });
   } catch (err) {
+    releaseFileLock(doingFile);
+    releaseFileLock(doneFile);
     res.send({ data: '', code: 0, msg: err.message });
   }
 });
+
 
 // 创建任务
 router.post('/create', async function (req, res) {

@@ -1,17 +1,28 @@
 const { FusesPlugin } = require('@electron-forge/plugin-fuses');
 const { FuseV1Options, FuseVersion } = require('@electron/fuses');
+const path = require('path');
 
 module.exports = {
   packagerConfig: {
     asar: {
-      unpackDir: "server/db"
+      unpackDir: "server/db" // db 文件夹不打包到 asar，方便修改
     },
   },
   rebuildConfig: {},
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
-      config: {},
+      config: {
+        name: 'todo_workbench',
+        authors: 'ciciya-',
+        exe: 'todo_workbench.exe',
+        setupExe: 'To-Do-Workbench-Setup.exe',
+        setupIcon: path.join(__dirname, 'logoTray.ico'), // 快捷方式图标
+        noMsi: true,
+        createDesktopShortcut: true,
+        createStartMenuShortcut: true,
+        shortcutName: 'To-Do Workbench'
+      },
     },
     {
       name: '@electron-forge/maker-zip',
@@ -31,8 +42,6 @@ module.exports = {
       name: '@electron-forge/plugin-auto-unpack-natives',
       config: {},
     },
-    // Fuses are used to enable/disable various Electron functionality
-    // at package time, before code signing the application
     new FusesPlugin({
       version: FuseVersion.V1,
       [FuseV1Options.RunAsNode]: false,
